@@ -36,7 +36,7 @@ public class Bomber : MonoBehaviour {
 
     // Returns the maximum amount of bombs that the bomber has
     public int GetMaxBombs() {
-        return this.MaxBombs;
+        return MaxBombs;
     }
 
     // Sets the amount of lives that the bomber has to the specified amount
@@ -46,7 +46,7 @@ public class Bomber : MonoBehaviour {
 
     // Returns the amount of lives that the bomber has
     public int GetLives() {
-        return this.Lives;
+        return Lives;
     }
 
     // Hits the bomber - reduces his lives by 1, checks if he dies and triggers invulnerability effect
@@ -54,8 +54,9 @@ public class Bomber : MonoBehaviour {
         //TODO
     }
 
+    // Makes the bomber place a bomb at his location
     public void PlaceBomb() {
-        Map.Instance.
+        //TODO
     }
 
 }

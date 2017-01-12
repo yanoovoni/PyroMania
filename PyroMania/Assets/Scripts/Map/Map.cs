@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System;
 
-public class Map : Singleton<Map> {
+public class Map : MonoBehaviour {
+    public static Map instance = null; //Static instance of Map which allows it to be accessed by any other script.
     protected Map() {} // guarantee this will be always a singleton only - can't use the constructor!
-    protected int[,] MapInfo; // A 2d array containing all of the map's information
+    protected Tile[,] MapInfo; // A 2d array containing all of the map's information
     protected bool Visible; // Determines if the map is visible or not
     
     // Use this for initialization
@@ -30,11 +31,11 @@ public class Map : Singleton<Map> {
             string[] MapFileLines = MapFile.text.Split(NewLine, StringSplitOptions.RemoveEmptyEntries);
             string[] StringMapSize = MapFileLines[0].Split(' ');
             int[] MapSize = { int.Parse(StringMapSize[0]), int.Parse(StringMapSize[1]) };
-            this.MapInfo = new int[MapSize[0], MapSize[1]];
+            this.MapInfo = new Tile[MapSize[0], MapSize[1]];
             for (int i = 0; i < MapSize[0]; i++) {
                 string[] MapFileLine = MapFileLines[i + 1].Split(' ');
                 for (int i2 = 0; i2 < MapSize[1]; i2++) {
-                    this.MapInfo[i, i2] = int.Parse(MapFileLine[i2]);
+                    this.MapInfo[i, i2] = this.CreateTile(int.Parse(MapFileLine[i2]), i, i2);
                 }
             }
             Resources.UnloadAsset(MapFile);
@@ -55,13 +56,32 @@ public class Map : Singleton<Map> {
         return this.Visible;
     }
 
+    // Creates a tile object from it's id and location
+    private Tile CreateTile(int TileId, int XPos, int YPos) {
+        Tile T = null;
+        switch (TileId) {
+            case 0:
+                T = gameObject.AddComponent<Ground>();
+                break;
+            case 1:
+                T = gameObject.AddComponent<Wall>();
+                break;
+            case 2:
+                T = gameObject.AddComponent<Rock>();
+                break;
+        }
+        if (T != null)
+            T.SetLoc(XPos, YPos);
+        return T;
+    }
+
     // Changes a specified tile on the map to the specified value
-    public void SetTile(int XPos, int YPos, int Value) {
+    public void SetTile(int XPos, int YPos, Tile Value) {
         this.MapInfo[XPos, YPos] = Value;
     }
 
     // Returns the value of a specified tile
-    public int GetTile(int XPos, int YPos) {
+    public Tile GetTile(int XPos, int YPos) {
         return this.MapInfo[XPos, YPos];
     }
 
