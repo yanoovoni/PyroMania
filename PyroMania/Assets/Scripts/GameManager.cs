@@ -6,16 +6,12 @@ public class GameManager : MonoBehaviour {
     public static GameManager instance = null;
     public MapManager mapManager;
 
-    void Awake() {
-        
-    } 
-
     // Use this for initialization
-    void Start () {
+    void Awake () {
         if (instance == null) {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            mapManager = GameObject.Find("MapManager").GetComponent<MapManager>();
+            mapManager = GetComponent<MapManager>();
         } else if (instance != this)
             Destroy(gameObject);
     }
@@ -23,5 +19,13 @@ public class GameManager : MonoBehaviour {
     // Update is called once per frame
     void Update () {
     
+    }
+
+    public void LoadGame(string mapName) {
+        CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
+        camera.HideAllLayers();
+        camera.LayerCullingShow("UI");
+        mapManager.LoadMap(mapName);
+        camera.ShowAllLayers();
     }
 }
