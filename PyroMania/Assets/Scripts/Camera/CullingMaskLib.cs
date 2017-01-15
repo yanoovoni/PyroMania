@@ -4,7 +4,7 @@ public class CullingMaskLib : MonoBehaviour {
     
     Camera cam;
     
-    void Start() {
+    void Awake() {
         cam = gameObject.GetComponent<Camera>();
     }
     
@@ -13,7 +13,7 @@ public class CullingMaskLib : MonoBehaviour {
     }
     
     public void ShowAllLayers() {
-        cam.cullingMask = 1;
+        cam.cullingMask = int.MaxValue;
     }
     
     public void LayerCullingShow(int layerMask) {
