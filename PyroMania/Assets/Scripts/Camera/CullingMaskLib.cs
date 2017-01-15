@@ -2,22 +2,16 @@
 
 public class CullingMaskLib : MonoBehaviour {
     
-    Camera cam;
-    
-    void Awake() {
-        cam = gameObject.GetComponent<Camera>();
-    }
-    
     public void HideAllLayers() {
-        cam.cullingMask = 0;
+        gameObject.GetComponent<Camera>().cullingMask = 0;
     }
     
     public void ShowAllLayers() {
-        cam.cullingMask = int.MaxValue;
+        gameObject.GetComponent<Camera>().cullingMask = int.MaxValue;
     }
     
     public void LayerCullingShow(int layerMask) {
-        cam.cullingMask |= layerMask;
+        gameObject.GetComponent<Camera>().cullingMask |= layerMask;
     }
     
     public void LayerCullingShow(string layer) {
@@ -25,7 +19,7 @@ public class CullingMaskLib : MonoBehaviour {
     }
     
     public void LayerCullingHide(int layerMask) {
-        cam.cullingMask &= ~layerMask;
+        gameObject.GetComponent<Camera>().cullingMask &= ~layerMask;
     }
     
     public void LayerCullingHide(string layer) {
@@ -33,7 +27,7 @@ public class CullingMaskLib : MonoBehaviour {
     }
     
     public void LayerCullingToggle(int layerMask) {
-        cam.cullingMask ^= layerMask;
+        gameObject.GetComponent<Camera>().cullingMask ^= layerMask;
     }
     
     public void LayerCullingToggle(string layer) {
@@ -41,7 +35,7 @@ public class CullingMaskLib : MonoBehaviour {
     }
     
     public bool LayerCullingIncludes(int layerMask) {
-        return (cam.cullingMask & layerMask) > 0;
+        return (gameObject.GetComponent<Camera>().cullingMask & layerMask) > 0;
     }
     
     public bool LayerCullingIncludes(string layer) {

@@ -30,7 +30,6 @@ public class GameManager : MonoBehaviour {
 
     // Loads the game
     public void LoadGame(string mapName) {
-        SetToGame();
         CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");
