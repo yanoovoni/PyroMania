@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace Server {
     static class Printer {
+        // Prints a message to the console
         public static void Print(string message, [CallerMemberName]string callerName = "") {
-#if (DEBUG)
             Console.WriteLine("{0}|{1}: {2}", DateTime.Now.ToString("hh:mm:ss"), callerName, message);
-#endif
         }
     }
 }

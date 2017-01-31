@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System;
+using System.Diagnostics;
 
 public class GameManager : MonoBehaviour {
 
@@ -51,5 +53,16 @@ public class GameManager : MonoBehaviour {
             SceneManager.LoadScene("Menu", LoadSceneMode.Single);
         }
         controller = Instantiate(controllers[menuControllerIndex]);
+    }
+
+    // Starts a server
+    public void StartServer(string args) {
+        Process serverProcess = new Process();
+        System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+        startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + @"\Server\Server.exe";
+        startInfo.CreateNoWindow = true;
+        startInfo.Arguments = args;
+        serverProcess.StartInfo = startInfo;
+        serverProcess.Start();
     }
 }

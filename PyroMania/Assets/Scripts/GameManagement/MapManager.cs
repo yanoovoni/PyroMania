@@ -27,7 +27,7 @@ public class MapManager : MonoBehaviour {
             for (int Row = 0; Row < mapSize[0]; Row++) {
                 string[] mapFileLine = mapFileLines[Row + 1].Split(' ');
                 for (int Col = 0; Col < mapSize[1]; Col++) {
-                    CreateTile(int.Parse(mapFileLine[Col]), Col, mapSize[0] - 1 - Row);
+                    CreateTile(mapFileLine[Col], Col, mapSize[0] - 1 - Row);
                 }
             }
             Resources.UnloadAsset(mapFile);
@@ -39,20 +39,20 @@ public class MapManager : MonoBehaviour {
     }
 
     // Creates a tile game object from it's id and location
-    protected GameObject CreateTile(int tileId, int xPos, int yPos) {
+    protected GameObject CreateTile(string tileId, int xPos, int yPos) {
         GameObject tile = null;
         switch (tileId) {
-            case 0: // Ground tile
-            case 3: // Spawn tile
+            case "0": // Ground tile
+            case "3": // Spawn tile
                 tile = GetRandomTile(groundTiles);
-                if (tileId == 3) {
+                if (tileId == "3") {
                     AddSpawnLoc(new int[]{xPos, yPos});
                 }
                 break;
-            case 1: // Wall tile
+            case "1": // Wall tile
                 tile = GetRandomTile(wallTiles);
                 break;
-            case 2: // Rock tile
+            case "2": // Rock tile
                 tile = GetRandomTile(rockTiles);
                 break;
         }
