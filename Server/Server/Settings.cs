@@ -12,7 +12,7 @@ namespace Server {
         protected string settingsLocation = AppDomain.CurrentDomain.BaseDirectory + @"Files\settings.cfg"; // A string of the location of the settings file
         protected string defaultSettingsLocation = AppDomain.CurrentDomain.BaseDirectory + @"Files\defaultsettings.cfg"; // A string of the location of the default settings file
         protected Dictionary<string, string> settingsDict = new Dictionary<string, string>(); // A dictionary that remembers the settings from the settings file
-        protected Semaphore readLock = new Semaphore(0, 10); // A semaphore used to make sure that there are no reading threads running when a writing thread is running
+        protected Semaphore readLock = new Semaphore(10, 10); // A semaphore used to make sure that there are no reading threads running when a writing thread is running
         protected Mutex writeLock = new Mutex(); // A mutex used to make sure that no writing threads are running at the same time
 
         protected Settings() {
@@ -55,7 +55,7 @@ namespace Server {
 
         // Loads the settings from the settings file to the settings dictionary
         protected void LoadSettings(string settingsLocation) {
-            char[] settingSeperators = new char[] { '#' };
+            char[] settingSeperators = new char[] { '=' };
             string[] newLineSeperators = new string[] { "\r\n" };
             writeLock.WaitOne();
             readLock.WaitOne();
