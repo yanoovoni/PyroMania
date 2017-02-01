@@ -11,7 +11,8 @@ namespace Server {
         protected static Settings instance; // The instance of the singleton
         protected string settingsLocation = AppDomain.CurrentDomain.BaseDirectory + @"Files\settings.cfg"; // A string of the location of the settings file
         protected string defaultSettingsLocation = AppDomain.CurrentDomain.BaseDirectory + @"Files\defaultsettings.cfg"; // A string of the location of the default settings file
-        protected Dictionary<string, string> settingsDict = new Dictionary<string, string>(); // A dictionary that remembers the settings from the settings file
+        protected Dictionary<string, string> settingsDict = new Dictionary<string, string>(); // A dictionary that holds the settings from the settings file
+        protected Dictionary<string, string> tempSettingsDict = new Dictionary<string, string>(); // A dictionary that holds the temporary settings that will not be saved
         protected Semaphore readLock = new Semaphore(10, 10); // A semaphore used to make sure that there are no reading threads running when a writing thread is running
         protected Mutex writeLock = new Mutex(); // A mutex used to make sure that no writing threads are running at the same time
 
@@ -35,7 +36,7 @@ namespace Server {
             }
         }
 
-        // Returns the requested settings
+        // Returns the requested setting
         public string GetSetting(string key) {
             string setting;
             if (settingsDict.TryGetValue(key, out setting))
@@ -43,7 +44,7 @@ namespace Server {
             return null;
         }
 
-        // Sets the requested setting to given value
+        // Sets the requested setting to the given value
         public bool SetSetting(string key, string value) {
             if (settingsDict.ContainsKey(key)) {
                 settingsDict.Add(key, value);
@@ -110,6 +111,28 @@ namespace Server {
             for (int i = 0; i < 10; i++)
                 readLock.Release();
             writeLock.ReleaseMutex();
+        }
+
+        // Returns the requested temporary setting
+        public string GetTempSetting(string key) {
+            string setting;
+            if (tempSettingsDict.TryGetValue(key, out setting))
+                return setting;
+            return null;
+        }
+
+        // Sets the requested temporary setting to the given value
+        public bool SetTempSetting(string key, string value) {
+            if (tempSettingsDict.ContainsKey(key)) {
+                tempSettingsDict.Add(key, value);
+                return true;
+            }
+            return false;
+        }
+
+        // Loads the settings from the settings dictionary to the temporary settings dictionary
+        protected void LoadTempSettings() {
+            tempSettingsDict = new Dictionary<string, string>(settingsDict);
         }
     }
 }

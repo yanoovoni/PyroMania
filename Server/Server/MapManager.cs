@@ -7,15 +7,27 @@ using System.Threading.Tasks;
 
 namespace Server {
     public class MapManager {
-
+        protected static MapManager instance; // The instance of the singleton
         protected string[,] mapInfo; // A 2d array containing all of the map's information
         protected List<int[]> spawnLocs = new List<int[]>(); // A list of spawn locations on the map 
+
+        protected MapManager() { }
+
+        // Returns the instance of the singleton, creates a new one if there isn't one
+        public static MapManager Instance {
+            get {
+                if (instance == null) {
+                    instance = new MapManager();
+                }
+                return instance;
+            }
+        }
 
         // Loads the map from the file in the given location.
         public bool LoadMap(string mapName) {
             try {
                 string[] newLine = { "\r\n" };
-                StreamReader mapFile = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + @"\Files\Maps\" + mapName);
+                StreamReader mapFile = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + @"\Files\Maps\" + mapName + ".pmm");
                 if (mapFile == null) {
                     Printer.Print("Map file not found");
                     return false;

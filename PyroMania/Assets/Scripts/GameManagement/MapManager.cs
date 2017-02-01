@@ -12,7 +12,8 @@ public class MapManager : MonoBehaviour {
     public GameObject[] wallTiles; // An array of wall tile game objects
 
     // Loads the map from the file in the given location.
-    public bool LoadMap(string mapName) {
+    public bool LoadMap(string mapData) {
+        //TODO
         try {
             string[] newLine = { "\r\n" };
             TextAsset mapFile = Resources.Load("Maps/" + mapName) as TextAsset;

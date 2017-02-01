@@ -8,6 +8,7 @@ namespace Server {
     class Program {
         static void Main(string[] args) {
             Settings s = Settings.Instance;
+
         }
     }
 }
