@@ -54,6 +54,11 @@ namespace Server {
             return false;
         }
 
+        // Returns whether the setting key exists
+        public bool ContainsSettingKey(string key) {
+            return settingsDict.ContainsKey(key);
+        }
+
         // Loads the settings from the settings file to the settings dictionary
         protected void LoadSettings(string settingsLocation) {
             char[] settingSeperators = new char[] { '=' };
@@ -128,6 +133,11 @@ namespace Server {
                 return true;
             }
             return false;
+        }
+
+        // Returns whether the temporary setting key exists
+        public bool ContainsTempSettingKey(string key) {
+            return tempSettingsDict.ContainsKey(key);
         }
 
         // Loads the settings from the settings dictionary to the temporary settings dictionary

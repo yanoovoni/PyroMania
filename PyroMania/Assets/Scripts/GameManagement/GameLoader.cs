@@ -4,7 +4,7 @@ using System.Collections;
 public class GameLoader : MonoBehaviour {
 
     void Start() {
-        GameManager.instance.LoadGame("Test");
+        GameManager.instance.LoadGame();
     }
     
     // Update is called once per frame

@@ -16,12 +16,7 @@ public class MapManager : MonoBehaviour {
         //TODO
         try {
             string[] newLine = { "\r\n" };
-            TextAsset mapFile = Resources.Load("Maps/" + mapName) as TextAsset;
-            if (mapFile == null) {
-                print("Map file not found");
-                return false;
-            }
-            string[] mapFileLines = mapFile.text.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
+            string[] mapFileLines = mapData.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
             string[] stringMapSize = mapFileLines[0].Split(' ');
             int[] mapSize = { int.Parse(stringMapSize[0]), int.Parse(stringMapSize[1]) };
             mapInfo = new GameObject[mapSize[0], mapSize[1]];
@@ -31,10 +26,9 @@ public class MapManager : MonoBehaviour {
                     CreateTile(mapFileLine[Col], Col, mapSize[0] - 1 - Row);
                 }
             }
-            Resources.UnloadAsset(mapFile);
             return true;
         } catch (IndexOutOfRangeException) {
-            Debug.Log("Map file corrupt");
+            Debug.Log("Map data corrupt");
             return false;
         }
     }

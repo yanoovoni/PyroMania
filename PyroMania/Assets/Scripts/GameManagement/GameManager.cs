@@ -31,11 +31,13 @@ public class GameManager : MonoBehaviour {
     }
 
     // Loads the game
-    public void LoadGame(string mapName) {
+    public void LoadGame() {
+        //TODO
         CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");
-        mapManager.LoadMap(mapName);
+        
+        mapManager.LoadMap();
         camera.ShowAllLayers();
     }
 
