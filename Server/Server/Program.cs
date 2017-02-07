@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Server {
     class Program {
-        static void Main(string[] args) {
+        public static void Main(string[] args) {
             Settings S = Settings.Instance;
             for (int i = 0; i < args.Length; i += 2) {
                 if (args[i].StartsWith("-") && S.ContainsTempSettingKey(args[i].Substring(1))) {

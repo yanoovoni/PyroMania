@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Net;
 
 namespace Server {
-    class NetworkManager {
+    public class NetworkManager {
         protected static NetworkManager instance; // The instance of the singleton
         protected TcpListener tcpListenerSocket; // The TCP listener socket
         protected UdpClient udpSocket; // The UDP socket

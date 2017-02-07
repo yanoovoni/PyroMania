@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Server {
     // An object that is used as an interface to the settings files
-    class Settings {
+    public class Settings {
         protected static Settings instance; // The instance of the singleton
         protected string settingsLocation = AppDomain.CurrentDomain.BaseDirectory + @"Files\settings.cfg"; // A string of the location of the settings file
         protected string defaultSettingsLocation = AppDomain.CurrentDomain.BaseDirectory + @"Files\defaultsettings.cfg"; // A string of the location of the default settings file
