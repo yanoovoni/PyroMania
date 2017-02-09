@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Server {
@@ -10,6 +11,7 @@ namespace Server {
         protected int y;
         protected int creationTime;
         protected Bomber bomber;
+        protected Thread fuseThread;
 
         public Bomb(int x, int y, int creationTime, Bomber bomber) {
             this.x = x;
@@ -17,7 +19,9 @@ namespace Server {
             this.creationTime = creationTime;
             this.bomber = bomber;
             bomber.PlaceBomb();
-
+            fuseThread = new Thread(new ThreadStart(this.WaitForFuse));
+            fuseThread.IsBackground = true;
+            fuseThread.Start();
         }
 
         // Returns the location of the bomb
@@ -25,9 +29,10 @@ namespace Server {
             return new int[] { x, y };
         }
 
-        // Returns a bomb back to the bomber
+        // Returns a bomb back to the bomber and removes it from the map
         public void BlowUp() {
             bomber.ReturnBomb();
+            MapManager.Instance.DeleteBomb(this);
         }
 
         // Waits for the bomb to explode and then calls BlowUp()

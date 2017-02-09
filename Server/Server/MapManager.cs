@@ -83,7 +83,28 @@ namespace Server {
 
         // Returns the bomber with the given name. Returns null if the bomber does not exist
         public Bomber GetBomber(string name) {
+            for (int i = 0; i < bombers.Count; i++) {
+                Bomber b = bombers.ElementAt(i);
+                if (b.GetName() == name) {
+                    return b;
+                }
+            }
+            return null;
+        }
 
+        // Adds a bomber to the bomber list
+        public void AddBomber(Bomber bomber) {
+            bombers.Add(bomber);
+        }
+
+        // Adds a bomb to the bomb list
+        public void AddBomb(Bomb bomb) {
+            bombs.Add(bomb);
+        }
+
+        // Deletes the bomb from the bomb list and returns true if the bomb was deleted
+        public bool DeleteBomb(Bomb bomb) {
+            return bombs.Remove(bomb);
         }
     }
 }

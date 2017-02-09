@@ -12,7 +12,7 @@ namespace Server {
         protected Stopwatch stopWatch;
 
         protected Timer() {
-
+            stopWatch = new Stopwatch();
         }
 
         // Returns the instance of the singleton, creates a new one if there isn't one
@@ -27,13 +27,12 @@ namespace Server {
 
         // Starts the clock
         public void Start() {
-            stopWatch = new Stopwatch();
             stopWatch.Start();
         }
 
         // Returns for how long the timer was running
-        public int GetTime() {
-            return (int)stopWatch.ElapsedMilliseconds;
+        public long GetTime() {
+            return stopWatch.ElapsedMilliseconds;
         }
 
         // Waits the given time
@@ -42,8 +41,8 @@ namespace Server {
         }
 
         // Waits the given duration as if it was started at the given start time
-        public void Wait(int startTime, int duration) {
-            int waitTime = duration - ((int)stopWatch.ElapsedMilliseconds - startTime);
+        public void Wait(long startTime, long duration) {
+            int waitTime = (int)(duration - stopWatch.ElapsedMilliseconds - startTime);
             if (waitTime > 0)
                 Thread.Sleep(waitTime);
         }

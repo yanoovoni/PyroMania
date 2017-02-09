@@ -16,6 +16,7 @@ namespace Server {
                 }
             }
             MapManager MM = MapManager.Instance;
+            MM.LoadMap(S.GetTempSetting("map"));
             NetworkManager NM = NetworkManager.Instance;
         }
     }

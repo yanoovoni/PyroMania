@@ -12,7 +12,7 @@ namespace Server {
         private int health; // The amount of health the bomber has left
         private int bombs; // The amount of bombs the bomber has left. Can't be lower than 0
         
-        public Bomber(string name, double x, double y) {
+        public Bomber(string name, double x = 0, double y = 0) {
             this.name = name;
             this.x = x;
             this.y = y;
