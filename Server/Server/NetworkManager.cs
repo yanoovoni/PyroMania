@@ -56,15 +56,14 @@ namespace Server {
             string[,] parameters = Protocol.AnalizeTcpPayload(payload);
             for (int i = 0; i < parameters.GetLength(0); i++) {
                 switch (parameters[i, 0]) {
-                    case "Name":
-                        if (MapManager.Instance.GetBomber(parameters[i, 1]) == null)
+                    case "Name": // This is a client who wants to join the game
+                        if (MapManager.Instance.GetBomber(parameters[i, 1]) == null) {
                             newBomber = new Bomber(parameters[i, 1]);
+                            MapManager.Instance.AddBomber(newBomber);
+                            players.Add(tcpClient.RemoteEndPoint as IPEndPoint);
+                        }
                         break;
                 }
-            }
-            if (newBomber != null) {
-                MapManager.Instance.AddBomber(newBomber);
-                players.Add(tcpClient.RemoteEndPoint as IPEndPoint);
             }
         }
 
