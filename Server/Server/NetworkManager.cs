@@ -40,28 +40,32 @@ namespace Server {
             thread.Start(tcpClient);
         }
 
-        // Communicates with tcp client
-        protected void HandleTcpClient(Socket tcpClient) {
-            Bomber newBomber = null;
+        // Recieves one packet from a tcp socket
+        protected string RecvTcp(Socket socket) {
             string messageHeader = "";
             byte[] oneByteBuffer = new byte[1];
             while (!messageHeader.EndsWith("\r\n\r\n")) {
-                tcpClient.Receive(oneByteBuffer);
+                socket.Receive(oneByteBuffer);
                 messageHeader += Encoding.UTF8.GetChars(oneByteBuffer);
             }
             int payloadSize;
             Protocol.AnalizeTcpHeader(messageHeader, out payloadSize);
             byte[] payloadBuffer = new byte[payloadSize];
-            string payload = "" + Encoding.UTF8.GetChars(payloadBuffer);
-            string[,] parameters = Protocol.AnalizeTcpPayload(payload);
+            return "" + Encoding.UTF8.GetChars(payloadBuffer);
+        }
+
+        // Sends a string to a given tcp socket
+        protected void SendTcp(Socket socket, string message) {
+            socket.Send(Encoding.UTF8.GetBytes(message));
+        }
+
+        // Communicates with tcp client
+        protected void HandleTcpClient(Socket tcpClient) {
+            string[,] parameters = Protocol.AnalizeTcpPayload(RecvTcp(tcpClient));
             for (int i = 0; i < parameters.GetLength(0); i++) {
                 switch (parameters[i, 0]) {
                     case "Name": // This is a client who wants to join the game
-                        if (MapManager.Instance.GetBomber(parameters[i, 1]) == null) {
-                            newBomber = new Bomber(parameters[i, 1]);
-                            MapManager.Instance.AddBomber(newBomber);
-                            players.Add(tcpClient.RemoteEndPoint as IPEndPoint);
-                        }
+                        AddPlayer(tcpClient, new Bomber(parameters[i, 1]));
                         break;
                 }
             }
@@ -77,6 +81,30 @@ namespace Server {
 
         }
 
+        // Adds a player to the network manager's list of players and the bomber to the map manager. If the bomber's name is taken does not add him. returns if successful and notifies the player
+        protected bool AddPlayer(Socket playerSocket, Bomber bomber) {
+            IPEndPoint player = playerSocket.RemoteEndPoint as IPEndPoint;
+            string[,] responseMessage;
+            string errMessage = null;
+            if (MapManager.Instance.SlotsLeft() <= 0) {
+                errMessage = "Server full";
+            } else if (MapManager.Instance.GetBomber(bomber.GetName()) == null) {
+                errMessage = "Name taken";
+            }
+            if (errMessage == null) { // Bomber with that name does not exist so add this player to the game
+                MapManager.Instance.AddBomber(bomber);
+                players.Add(player);
+                ListenUdp(player);
+                responseMessage = new string[2, 2] { { "Connection", "Success" }, { "Map", MapManager.Instance.GetMap() } };
+                SendTcp(playerSocket, Protocol.CreateTcpPacket(responseMessage));
+                return true;
+            } else { // Bomber with that name exists so tell player to fuck off
+                responseMessage = new string[2, 2] { { "Connection", "Failure" }, { "Error", errMessage } };
+                SendTcp(playerSocket, Protocol.CreateTcpPacket(responseMessage));
+                return false;
+            }
+        }
+
         // Class in charge of creating and analizing protocol messages
         protected static class Protocol {
             public static string[] newLine = new string[] { "\r\n" };
@@ -86,7 +114,7 @@ namespace Server {
             public static bool AnalizeTcpHeader(string header, out int payloadSize) {
                 payloadSize = 0;
                 string[] headerLines = header.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
-                if (headerLines[0] != "Pyromania " + Settings.Instance.GetTempSetting("version") + "\r\n") {
+                if (headerLines[0] != String.Format("Pyromania {0}\r\n", Settings.Instance.GetTempSetting("version"))) {
                     return false;
                 }
                 for (int i = 1; i < headerLines.Length; i++) {
@@ -120,6 +148,16 @@ namespace Server {
                     }
                 } 
                 return payloadArray;
+            }
+
+            // Creates a tcp packet
+            public static string CreateTcpPacket(string[,] payloadArray) {
+                string payload = "";
+                for (int i = 0; i < payloadArray.GetLength(0); i++) {
+                    payload += String.Format("{0}: {1}\r\n", payloadArray[i, 0], payloadArray[i, 1]);
+                }
+                string packet = String.Format("Pyromania {0}\r\nLength: {1}\r\n\r\n{2}", Settings.Instance.GetTempSetting("version"), payload.Length, payload);
+                return packet;
             }
         }
     }

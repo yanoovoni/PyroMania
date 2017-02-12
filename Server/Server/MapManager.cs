@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -105,6 +105,16 @@ namespace Server {
         // Deletes the bomb from the bomb list and returns true if the bomb was deleted
         public bool DeleteBomb(Bomb bomb) {
             return bombs.Remove(bomb);
+        }
+
+        // Returns how many slots are left in the server
+        public int SlotsLeft() {
+            return spawnLocs.Count - bombers.Count;
+        }
+
+        // Returns the map's data
+        public string GetMap() {
+            return mapData;
         }
     }
 }
