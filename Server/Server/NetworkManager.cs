@@ -76,9 +76,18 @@ namespace Server {
 
         }
 
-        // Sends updates to the clients
-        protected void SendUdp() {
+        // Sends updates to all of the clients
+        protected void UpdateClients() {
+            string updateData;
+            foreach (IPEndPoint player in players.ToArray()) {
+                SendUdp(updateData, player);
+            }
+        }
 
+        // Sends a udp message to the client
+        protected void SendUdp(string message, IPEndPoint client) {
+            byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+            udpSocket.Send(messageBytes, messageBytes.Length, client);
         }
 
         // Adds a player to the network manager's list of players and the bomber to the map manager. If the bomber's name is taken does not add him. returns if successful and notifies the player
@@ -159,6 +168,8 @@ namespace Server {
                 string packet = String.Format("Pyromania {0}\r\nLength: {1}\r\n\r\n{2}", Settings.Instance.GetTempSetting("version"), payload.Length, payload);
                 return packet;
             }
+
+            public static string CreateUdpPacket()
         }
     }
 }

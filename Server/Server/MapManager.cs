@@ -56,6 +56,7 @@ namespace Server {
         public void AddTile(int xPos, int yPos, string tile) {
             switch (tile) {
                 case "2": // If the tile is a rock
+                    AddRockLoc(new int[] { xPos, yPos });
                     break;
                 case "3": // If the tile is a spawn position
                     AddSpawnLoc(new int[] { xPos, yPos });
