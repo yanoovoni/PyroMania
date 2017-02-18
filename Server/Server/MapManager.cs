@@ -117,5 +117,20 @@ namespace Server {
         public string GetMap() {
             return mapData;
         }
+
+        // Returns the rocks locations list
+        public List<int[]> GetRockLocs() {
+            return rockLocs;
+        }
+
+        // Returns the bombers list
+        public List<Bomber> GetBombers() {
+            return bombers;
+        }
+
+        // Returns the bombs list
+        public List<Bomb> GetBombs() {
+            return bombs;
+        }
     }
 }

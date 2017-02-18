@@ -40,5 +40,9 @@ namespace Server {
             Timer.Instance.Wait(creationTime, int.Parse(Settings.Instance.GetTempSetting("timer")));
             BlowUp();
         }
+
+        public override string ToString() {
+            return String.Format("{0},{1},{2}", x, y, creationTime);
+        }
     }
 }

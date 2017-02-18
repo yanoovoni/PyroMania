@@ -73,12 +73,12 @@ namespace Server {
 
         // Listens to the UDP messages from a given client
         protected void ListenUdp(IPEndPoint IEP) {
-
+            //TODO
         }
 
         // Sends updates to all of the clients
         protected void UpdateClients() {
-            string updateData;
+            string updateData = Protocol.CreateUdpPacket();
             foreach (IPEndPoint player in players.ToArray()) {
                 SendUdp(updateData, player);
             }
@@ -169,7 +169,31 @@ namespace Server {
                 return packet;
             }
 
-            public static string CreateUdpPacket()
+            // Creates a server udp packet from the rocks locations, bomb objects and bomber objects
+            public static string CreateUdpPacket() {
+                MapManager mm = MapManager.Instance;
+                string rocksStr = "";
+                List<int[]> rockLocs = mm.GetRockLocs();
+                for (int i = 0; i < rockLocs.Count; i++) {
+                    int[] rockLoc = rockLocs.ElementAt(i);
+                    rocksStr += String.Format("{0},{1}|", rockLoc[0], rockLoc[1]);
+                }
+                rocksStr = rocksStr.Substring(0, rocksStr.Length - 1);
+                string bombsStr = "";
+                List<Bomb> bombs = mm.GetBombs();
+                for (int i = 0; i < bombs.Count; i++) {
+                    bombsStr += String.Format("{0}|", bombs.ElementAt(i).ToString());
+                }
+                bombsStr = bombsStr.Substring(0, bombsStr.Length - 1);
+                string bombersStr = "";
+                List<Bomber> bombers = mm.GetBombers();
+                for (int i = 0; i < bombers.Count; i++) {
+                    bombersStr += String.Format("{0}|", bombers.ElementAt(i).ToString());
+                }
+                bombersStr = bombersStr.Substring(0, bombersStr.Length - 1);
+                string packet = String.Format("{0} {1} {2}", rocksStr, bombsStr, bombersStr);
+                return packet;
+            }
         }
     }
 }
