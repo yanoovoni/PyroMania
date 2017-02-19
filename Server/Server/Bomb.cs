@@ -10,15 +10,12 @@ namespace Server {
         protected int x;
         protected int y;
         protected int creationTime;
-        protected Bomber bomber;
         protected Thread fuseThread;
 
-        public Bomb(int x, int y, int creationTime, Bomber bomber) {
+        public Bomb(int x, int y, int creationTime) {
             this.x = x;
             this.y = y;
             this.creationTime = creationTime;
-            this.bomber = bomber;
-            bomber.PlaceBomb();
             fuseThread = new Thread(new ThreadStart(this.WaitForFuse));
             fuseThread.IsBackground = true;
             fuseThread.Start();
@@ -31,7 +28,6 @@ namespace Server {
 
         // Returns a bomb back to the bomber and removes it from the map
         public void BlowUp() {
-            bomber.ReturnBomb();
             MapManager.Instance.DeleteBomb(this);
         }
 

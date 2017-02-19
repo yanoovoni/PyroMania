@@ -10,14 +10,12 @@ namespace Server {
         private double x; // The x location of the bomber
         private double y; // The y location of the bomber
         private int health; // The amount of health the bomber has left
-        private int bombs; // The amount of bombs the bomber has left. Can't be lower than 0
         
         public Bomber(string name, double x = 0, double y = 0) {
             this.name = name;
             this.x = x;
             this.y = y;
             this.health = int.Parse(Settings.Instance.GetTempSetting("health"));
-            this.bombs = int.Parse(Settings.Instance.GetTempSetting("bombs"));
         }
 
         // Returns the name of the bomber
@@ -44,25 +42,6 @@ namespace Server {
         public bool GetHit() {
             health--;
             return health > 0;
-        }
-
-        // Returns how many bombs the bomber can place
-        public int BombsLeft() {
-            return bombs;
-        }
-
-        // Reduces the bomb count by one if possible and returns if it was successful
-        public bool PlaceBomb() {
-            if (bombs > 0) {
-                bombs--;
-                return true;
-            }
-            return false;
-        }
-
-        // Increases the bomb count by one
-        public void ReturnBomb() {
-            bombs++;
         }
 
         public override string ToString() {

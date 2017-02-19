@@ -65,7 +65,9 @@ namespace Server {
             for (int i = 0; i < parameters.GetLength(0); i++) {
                 switch (parameters[i, 0]) {
                     case "Name": // This is a client who wants to join the game
-                        AddPlayer(tcpClient, new Bomber(parameters[i, 1]));
+                        if (AddPlayer(tcpClient, new Bomber(parameters[i, 1]))) {
+                            //TODO
+                        }
                         break;
                 }
             }
@@ -167,6 +169,32 @@ namespace Server {
                 }
                 string packet = String.Format("Pyromania {0}\r\nLength: {1}\r\n\r\n{2}", Settings.Instance.GetTempSetting("version"), payload.Length, payload);
                 return packet;
+            }
+
+            // Returns blown up rocks locations array, bomb objects array, player location and player's health array analized from the given packet
+            public static void AnalizeUdpPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out int[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+                string[] packetParts = packet.Split(' ');
+                string[] blownRocks = packetParts[0].Split('|'); // blownRcoksLocations
+                blownRocksLocations = new int[blownRocks.Length, 2];
+                for (int i = 0; i < blownRocks.Length; i++) {
+                    string[] rockLoc = blownRocks[i].Split(',');
+                    blownRocksLocations[i, 0] = int.Parse(rockLoc[0]);
+                    blownRocksLocations[i, 1] = int.Parse(rockLoc[1]);
+                }
+                string[] bombs = packetParts[1].Split('|'); // bombsArray
+                bombsArray = new Bomb[bombs.Length];
+                for (int i = 0; i < bombs.Length; i++) {
+                    string[] bombInfo = bombs[i].Split(',');
+                    bombsArray[i] = new Bomb(int.Parse(bombInfo[0]), int.Parse(bombInfo[1]), int.Parse(bombInfo[2]));
+                }
+                string[] playerLoc = packetParts[2].Split(','); // playerLocation
+                playerLocation = new int[2] { int.Parse(playerLoc[0]), int.Parse(playerLoc[1]) };
+                string[] playersHealth = packetParts[3].Split('|'); // playersHealthDict
+                playersHealthDict = new Dictionary<string, int>();
+                for (int i = 0; i < playersHealth.Length; i++) {
+                    string[] playerInfo = playersHealth[i].Split(',');
+                    playersHealthDict.Add(playerInfo[0], int.Parse(playerInfo[1]));
+                }
             }
 
             // Creates a server udp packet from the rocks locations, bomb objects and bomber objects
