@@ -10,7 +10,7 @@ namespace Server {
         private double x; // The x location of the bomber
         private double y; // The y location of the bomber
         private int health; // The amount of health the bomber has left
-        
+
         public Bomber(string name, double x = 0, double y = 0) {
             this.name = name;
             this.x = x;

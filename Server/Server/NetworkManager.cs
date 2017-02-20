@@ -40,7 +40,7 @@ namespace Server {
             thread.Start(tcpClient);
         }
 
-        // Recieves one packet from a tcp socket
+        // Receives one packet from a TCP socket
         protected string RecvTcp(Socket socket) {
             string messageHeader = "";
             byte[] oneByteBuffer = new byte[1];
@@ -54,12 +54,12 @@ namespace Server {
             return "" + Encoding.UTF8.GetChars(payloadBuffer);
         }
 
-        // Sends a string to a given tcp socket
+        // Sends a string to a given TCP socket
         protected void SendTcp(Socket socket, string message) {
             socket.Send(Encoding.UTF8.GetBytes(message));
         }
 
-        // Communicates with tcp client
+        // Communicates with TCP client
         protected void HandleTcpClient(Socket tcpClient) {
             string[,] parameters = Protocol.AnalizeTcpPayload(RecvTcp(tcpClient));
             for (int i = 0; i < parameters.GetLength(0); i++) {
@@ -86,7 +86,7 @@ namespace Server {
             }
         }
 
-        // Sends a udp message to the client
+        // Sends a UDP message to the client
         protected void SendUdp(string message, IPEndPoint client) {
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             udpSocket.Send(messageBytes, messageBytes.Length, client);
@@ -116,12 +116,12 @@ namespace Server {
             }
         }
 
-        // Class in charge of creating and analizing protocol messages
+        // Class in charge of creating and analyzing protocol messages
         protected static class Protocol {
             public static string[] newLine = new string[] { "\r\n" };
             public static string[] nameValueSeperator = new string[] { ": " };
 
-            // Checks if the tcp header is currect and gets the payload size
+            // Checks if the TCP header is correct and gets the payload size
             public static bool AnalizeTcpHeader(string header, out int payloadSize) {
                 payloadSize = 0;
                 string[] headerLines = header.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
@@ -141,7 +141,7 @@ namespace Server {
                 return true;
             }
 
-            // Returns an array of things sent in the payload seperated by name and value
+            // Returns an array of things sent in the payload separated by name and value
             public static string[,] AnalizeTcpPayload(string payload) {
                 string[] linesArray = payload.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
                 List<string[]> payloadList = new List<string[]>();
@@ -157,11 +157,11 @@ namespace Server {
                     } catch (IndexOutOfRangeException) {
                         Printer.Print("Bad TCP payload parameter");
                     }
-                } 
+                }
                 return payloadArray;
             }
 
-            // Creates a tcp packet
+            // Creates a TCP packet
             public static string CreateTcpPacket(string[,] payloadArray) {
                 string payload = "";
                 for (int i = 0; i < payloadArray.GetLength(0); i++) {
@@ -171,8 +171,8 @@ namespace Server {
                 return packet;
             }
 
-            // Returns blown up rocks locations array, bomb objects array, player location and player's health array analized from the given packet
-            public static void AnalizeUdpPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out int[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+            // Returns blown up rocks locations array, bomb objects array, player location and player's health array analyzed from the given packet
+            public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out int[] playerLocation, out Dictionary<string, int> playersHealthDict) {
                 string[] packetParts = packet.Split(' ');
                 string[] blownRocks = packetParts[0].Split('|'); // blownRcoksLocations
                 blownRocksLocations = new int[blownRocks.Length, 2];
@@ -197,7 +197,7 @@ namespace Server {
                 }
             }
 
-            // Creates a server udp packet from the rocks locations, bomb objects and bomber objects
+            // Creates a server UDP packet from the rocks locations, bomb objects and bomber objects
             public static string CreateUdpPacket() {
                 MapManager mm = MapManager.Instance;
                 string rocksStr = "";
