@@ -37,7 +37,7 @@ namespace Server {
             Socket tcpClient= tcpListenerSocket.AcceptSocket();
             Thread thread = new Thread(() => HandleTcpClient(tcpClient));
             thread.IsBackground = true;
-            thread.Start(tcpClient);
+            thread.Start();
         }
 
         // Receives one packet from a TCP socket
@@ -46,12 +46,12 @@ namespace Server {
             byte[] oneByteBuffer = new byte[1];
             while (!messageHeader.EndsWith("\r\n\r\n")) {
                 socket.Receive(oneByteBuffer);
-                messageHeader += Encoding.UTF8.GetChars(oneByteBuffer);
+                messageHeader += Encoding.UTF8.GetString(oneByteBuffer);
             }
             int payloadSize;
             Protocol.AnalizeTcpHeader(messageHeader, out payloadSize);
             byte[] payloadBuffer = new byte[payloadSize];
-            return "" + Encoding.UTF8.GetChars(payloadBuffer);
+            return Encoding.UTF8.GetString(payloadBuffer);
         }
 
         // Sends a string to a given TCP socket
@@ -65,17 +65,36 @@ namespace Server {
             for (int i = 0; i < parameters.GetLength(0); i++) {
                 switch (parameters[i, 0]) {
                     case "Name": // This is a client who wants to join the game
-                        if (AddPlayer(tcpClient, new Bomber(parameters[i, 1]))) {
-                            //TODO
-                        }
+                        AddPlayer(tcpClient, new Bomber(parameters[i, 1]));
                         break;
                 }
             }
         }
 
         // Listens to the UDP messages from a given client
-        protected void ListenUdp(IPEndPoint IEP) {
-            //TODO
+        protected void ListenUdp(IPEndPoint IEP, Bomber bomber) {
+            while (true) {
+                string message = Encoding.UTF8.GetString(udpSocket.Receive(ref IEP));
+                int[,] blownRocksLocations;
+                Bomb[] bombsArray;
+                double[] playerLocation;
+                Dictionary<string, int> playersHealthDict;
+                Protocol.AnalizeUDPPacket(message, out blownRocksLocations, out bombsArray, out playerLocation, out playersHealthDict);
+                for (int i = 0; i < blownRocksLocations.GetLength(0); i++) {
+                    int[] bombLoc = new int[] { blownRocksLocations[i, 0], blownRocksLocations[i, 1] };
+                    MapManager.Instance.DeleteBomb(bombLoc);
+                }
+                foreach (Bomb bomb in bombsArray) {
+                    MapManager.Instance.AddBomb(bomb);
+                }
+                bomber.SetPosition(playerLocation[0], playerLocation[1]);
+                foreach (KeyValuePair<string, int> curBomberInfo in playersHealthDict.ToArray()) {
+                    Bomber curBomber = MapManager.Instance.GetBomber(curBomberInfo.Key);
+                    if (curBomber.GetHealth() > curBomberInfo.Value) {
+                        curBomber.GetHit();
+                    }
+                }
+            }
         }
 
         // Sends updates to all of the clients
@@ -105,7 +124,9 @@ namespace Server {
             if (errMessage == null) { // Bomber with that name does not exist so add this player to the game
                 MapManager.Instance.AddBomber(bomber);
                 players.Add(player);
-                ListenUdp(player);
+                Thread thread = new Thread(() => ListenUdp(player, bomber));
+                thread.IsBackground = true;
+                thread.Start();
                 responseMessage = new string[2, 2] { { "Connection", "Success" }, { "Map", MapManager.Instance.GetMap() } };
                 SendTcp(playerSocket, Protocol.CreateTcpPacket(responseMessage));
                 return true;
@@ -172,7 +193,7 @@ namespace Server {
             }
 
             // Returns blown up rocks locations array, bomb objects array, player location and player's health array analyzed from the given packet
-            public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out int[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+            public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out double[] playerLocation, out Dictionary<string, int> playersHealthDict) {
                 string[] packetParts = packet.Split(' ');
                 string[] blownRocks = packetParts[0].Split('|'); // blownRcoksLocations
                 blownRocksLocations = new int[blownRocks.Length, 2];
@@ -188,7 +209,7 @@ namespace Server {
                     bombsArray[i] = new Bomb(int.Parse(bombInfo[0]), int.Parse(bombInfo[1]), int.Parse(bombInfo[2]));
                 }
                 string[] playerLoc = packetParts[2].Split(','); // playerLocation
-                playerLocation = new int[2] { int.Parse(playerLoc[0]), int.Parse(playerLoc[1]) };
+                playerLocation = new double[2] { double.Parse(playerLoc[0]), double.Parse(playerLoc[1]) };
                 string[] playersHealth = packetParts[3].Split('|'); // playersHealthDict
                 playersHealthDict = new Dictionary<string, int>();
                 for (int i = 0; i < playersHealth.Length; i++) {

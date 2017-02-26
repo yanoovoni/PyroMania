@@ -44,6 +44,11 @@ namespace Server {
             return health > 0;
         }
 
+        // Returns how much health the bomber has
+        public int GetHealth() {
+            return health;
+        }
+
         public override string ToString() {
             return String.Format("{0},{1},{2},{3}", name, x, y, health);
         }

@@ -6,7 +6,7 @@ public class StartButton : MonoBehaviour {
 
     public class OnClick : UnityEvent {
         void invoke() {
-            GameObject.Find("GameManager").GetComponent<GameManager>().LoadGame("Test");
+            GameObject.Find("GameManager").GetComponent<GameManager>().LoadGame();
         }
     }
 }

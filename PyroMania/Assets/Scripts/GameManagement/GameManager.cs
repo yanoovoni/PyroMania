@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour {
         } else if (instance != this)
             Destroy(gameObject);
     }
-    
+
     // Update is called once per frame
     void Update () {
 
@@ -32,11 +32,11 @@ public class GameManager : MonoBehaviour {
 
     // Loads the game
     public void LoadGame() {
-        //TODO
         CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");
-        
+        //TODO connect to server
+        //TODO get map data
         mapManager.LoadMap();
         camera.ShowAllLayers();
     }

@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 public class MapManager : MonoBehaviour {
 
     protected GameObject[,] mapInfo; // A 2d array containing all of the map's information
-    protected List<int[]> spawnLocs = new List<int[]>(); // A list of spawn locations on the map 
+    protected List<int[]> spawnLocs = new List<int[]>(); // A list of spawn locations on the map
     public GameObject[] groundTiles; // An array of ground tile game objects
     public GameObject[] rockTiles; // An array of rock tile game objects
     public GameObject[] wallTiles; // An array of wall tile game objects

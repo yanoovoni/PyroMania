@@ -108,6 +108,18 @@ namespace Server {
             return bombs.Remove(bomb);
         }
 
+        // Deleted the bomb in the given location and returns true if the bomb was deleted
+        public bool DeleteBomb(int[] bombLoc) {
+            for (int i = 0; i < bombs.Count; i++) {
+                int[] curBombLoc = bombs.ElementAt(i).GetLocation();
+                if (curBombLoc[0] == bombLoc[0] && curBombLoc[1] == bombLoc[1]) {
+                    bombs.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // Returns how many slots are left in the server
         public int SlotsLeft() {
             return spawnLocs.Count - bombers.Count;
