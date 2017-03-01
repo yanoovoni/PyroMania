@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager instance = null; // The instance of the game manager
     public MapManager mapManager; // The map manager
+    public NetworkManager networkManager; // The network manager
     public GameObject controller; // The current controller
     public GameObject[] controllers; // The controllers
     public static int menuControllerIndex = 0; // The index of the menu controller
@@ -20,6 +21,7 @@ public class GameManager : MonoBehaviour {
             instance = this;
             DontDestroyOnLoad(gameObject);
             mapManager = GetComponent<MapManager>();
+            networkManager = GetComponent<NetworkManager>();
             SetToMenu();
         } else if (instance != this)
             Destroy(gameObject);
@@ -36,8 +38,6 @@ public class GameManager : MonoBehaviour {
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");
         //TODO connect to server
-        //TODO get map data
-        mapManager.LoadMap();
         camera.ShowAllLayers();
     }
 

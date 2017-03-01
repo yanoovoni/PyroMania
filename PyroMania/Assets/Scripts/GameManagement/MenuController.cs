@@ -9,8 +9,16 @@ public class MenuController : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (Input.GetKeyDown("space")) {
-            GameManager.instance.SetToGame();
-        }
+    }
+
+    // Starts a singleplayer game
+    public void StartSingleplayer() {
+        GameManager.instance.StartServer("");
+        //TODO
+    }
+
+    // Starts a multiplayer game
+    public void StartMultiplayer() {
+
     }
 }
