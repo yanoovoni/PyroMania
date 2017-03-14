@@ -6,11 +6,13 @@ using Random = UnityEngine.Random;
 public class MapManager : MonoBehaviour {
 
     protected GameObject[,] mapInfo; // A 2d array containing all of the map's information
+    protected List<GameObject> bombs = new List<GameObject>(); // A list of all of the bombs
     protected List<int[]> spawnLocs = new List<int[]>(); // A list of spawn locations on the map
     public GameObject groundTile; // A ground tile game object
     public GameObject bricksTile; // A bricks tile game object
     public GameObject wallTile; // A wall tile game object
     public GameObject missingTile; // A missing tile game object
+    public GameObject bombTile; // A bomb tile game object
     public GameObject offlineBomber; // The offline bomber game object
     public GameObject[] onlineBombers; // The online bomber game objects
 
@@ -36,7 +38,7 @@ public class MapManager : MonoBehaviour {
     }
 
     // Creates a tile game object from it's id and location
-    protected GameObject CreateTile(string tileId, int xPos, int yPos) {
+    public GameObject CreateTile(string tileId, int xPos, int yPos) {
         GameObject tile = null;
         switch (tileId) {
             case "0": // Ground tile
@@ -79,5 +81,29 @@ public class MapManager : MonoBehaviour {
         } else {
             spawnLocs.Add(spawnLocation);
         }
+    }
+
+    // Returns the tile at the given location
+    public GameObject GetTile(int xPos, int yPos) {
+        return mapInfo[xPos, yPos];
+    }
+
+    // Creates a bomb
+    public void CreateBomb(int xPos, int yPos, int creationTime) {
+        GameObject newBomb = Instantiate(bombTile);
+        bombs.Add(newBomb);
+        newBomb.GetComponent<Bomb>().StartBomb(xPos, yPos, creationTime);
+    }
+
+    // Returns the bomb at the given location
+    public GameObject GetBomb(int xPos, int yPos) {
+        int[] location;
+        foreach (GameObject bomb in bombs.ToArray()) {
+            location = bomb.AddComponent<Bomb>().GetLocation();
+            if (location[0] == xPos && location[1] == yPos) {
+                return bomb;
+            }
+        }
+        return null;
     }
 }

@@ -7,9 +7,8 @@ using System;
 using System.Linq;
 
 public class NetworkManager : MonoBehaviour {
-    TcpClient tcpSocket; // The TCP socket
-    UdpClient udpSocket; // The UDP socket
-
+    protected TcpClient tcpSocket; // The TCP socket
+    protected UdpClient udpSocket; // The UDP socket
 
     // Use this for initialization
     void Start () {
@@ -83,11 +82,11 @@ public class NetworkManager : MonoBehaviour {
             return packet;
         }
 
-        /*
         // Returns blown up rocks locations array, bomb objects array, player location and player's health array analyzed from the given packet
-        public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out double[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+        public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out GameObject[] bombsArray, out double[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+            MapManager mapManager = GameManager.instance.mapManager.GetComponent<MapManager>();
             string[] packetParts = packet.Split(' ');
-            string[] blownRocks = packetParts[0].Split('|'); // blownRcoksLocations
+            string[] blownRocks = packetParts[0].Split('|'); // blownRocksLocations
             blownRocksLocations = new int[blownRocks.Length, 2];
             for (int i = 0; i < blownRocks.Length; i++) {
                 string[] rockLoc = blownRocks[i].Split(',');
@@ -95,10 +94,13 @@ public class NetworkManager : MonoBehaviour {
                 blownRocksLocations[i, 1] = int.Parse(rockLoc[1]);
             }
             string[] bombs = packetParts[1].Split('|'); // bombsArray
-            bombsArray = new Bomb[bombs.Length];
+            bombsArray = new GameObject[bombs.Length];
             for (int i = 0; i < bombs.Length; i++) {
                 string[] bombInfo = bombs[i].Split(',');
-                bombsArray[i] = new Bomb(int.Parse(bombInfo[0]), int.Parse(bombInfo[1]), int.Parse(bombInfo[2]));
+                int[] parsedBombInfo = new int[3] { int.Parse(bombInfo[0]), int.Parse(bombInfo[1]), int.Parse(bombInfo[2]) };
+                if (mapManager.GetBomb(parsedBombInfo[0], parsedBombInfo[1]) == null) {
+                    mapManager.CreateBomb(parsedBombInfo[0], parsedBombInfo[1], parsedBombInfo[2]);
+                }
             }
             string[] playerLoc = packetParts[2].Split(','); // playerLocation
             playerLocation = new double[2] { double.Parse(playerLoc[0]), double.Parse(playerLoc[1]) };

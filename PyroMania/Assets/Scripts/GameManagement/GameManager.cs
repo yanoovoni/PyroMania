@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour {
     public static GameManager instance = null; // The instance of the game manager
     public MapManager mapManager; // The map manager
     public NetworkManager networkManager; // The network manager
+    public Timer timer; // The timer
     public GameObject controller; // The current controller
     public GameObject[] controllers; // The controllers
     public static int menuControllerIndex = 0; // The index of the menu controller
@@ -22,6 +23,7 @@ public class GameManager : MonoBehaviour {
             DontDestroyOnLoad(gameObject);
             mapManager = GetComponent<MapManager>();
             networkManager = GetComponent<NetworkManager>();
+            timer = GetComponent<Timer>();
             SetToMenu();
         } else if (instance != this)
             Destroy(gameObject);

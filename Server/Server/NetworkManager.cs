@@ -129,12 +129,23 @@ namespace Server {
                 thread.Start();
                 responseMessage = new string[2, 2] { { "Connection", "Success" }, { "Map", MapManager.Instance.GetMap() } };
                 SendTcp(playerSocket, Protocol.CreateTcpPacket(responseMessage));
+                if (MapManager.Instance.SlotsLeft() <= 0) {
+                    StartGame();
+                }
                 return true;
             } else { // Bomber with that name exists so tell player to fuck off
                 responseMessage = new string[2, 2] { { "Connection", "Failure" }, { "Error", errMessage } };
                 SendTcp(playerSocket, Protocol.CreateTcpPacket(responseMessage));
                 return false;
             }
+        }
+
+        // Starts the game
+        public void StartGame() {
+            MapManager.Instance.SpawnBombers();
+            Thread thread = new Thread(() => UpdateClients());
+            thread.IsBackground = true;
+            thread.Start();
         }
 
         // Class in charge of creating and analyzing protocol messages

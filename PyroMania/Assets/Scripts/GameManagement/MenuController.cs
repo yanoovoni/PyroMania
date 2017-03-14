@@ -14,15 +14,16 @@ public class MenuController : MonoBehaviour {
     // Starts a singleplayer game
     public void StartSingleplayer() {
         GameManager.instance.StartServer("");
-        StartMultiplayer("127.0.0.1")
+        StartMultiplayer("127.0.0.1");
     }
-	
-	public void StartMultiplayer(string ip) {
-		//TODO
-	}
 
-    // Starts a multiplayer game
+    // Starts a multiplayer game using the given ip
+    public void StartMultiplayer(string ip) {
+        //TODO
+    }
+
+    // Starts a multiplayer game using the ip address from the input field in the menu
     public void StartMultiplayer() {
-		//TODO
+        //TODO
     }
 }

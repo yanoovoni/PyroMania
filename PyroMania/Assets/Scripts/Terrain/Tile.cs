@@ -16,6 +16,6 @@ public abstract class Tile : MonoBehaviour {
     public void SetLoc(int xPos, int yPos) {
         this.xPos = xPos;
         this.yPos = yPos;
-        transform.position = new Vector3(xPos * spriteWidth, yPos * spriteHeight, 0);
+        transform.position = new Vector2(xPos * spriteWidth, yPos * spriteHeight);
     }
 }
