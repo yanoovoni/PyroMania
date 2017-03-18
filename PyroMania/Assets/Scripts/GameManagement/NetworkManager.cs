@@ -83,7 +83,7 @@ public class NetworkManager : MonoBehaviour {
         }
 
         // Returns blown up rocks locations array, bomb objects array, player location and player's health array analyzed from the given packet
-        public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out GameObject[] bombsArray, out double[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+        public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out GameObject[] bombsArray, out Bomber.BomberInfo[] bombersArray) {
             MapManager mapManager = GameManager.instance.mapManager.GetComponent<MapManager>();
             string[] packetParts = packet.Split(' ');
             string[] blownRocks = packetParts[0].Split('|'); // blownRocksLocations
@@ -102,13 +102,11 @@ public class NetworkManager : MonoBehaviour {
                     mapManager.CreateBomb(parsedBombInfo[0], parsedBombInfo[1], parsedBombInfo[2]);
                 }
             }
-            string[] playerLoc = packetParts[2].Split(','); // playerLocation
-            playerLocation = new double[2] { double.Parse(playerLoc[0]), double.Parse(playerLoc[1]) };
-            string[] playersHealth = packetParts[3].Split('|'); // playersHealthDict
-            playersHealthDict = new Dictionary<string, int>();
-            for (int i = 0; i < playersHealth.Length; i++) {
-                string[] playerInfo = playersHealth[i].Split(',');
-                playersHealthDict.Add(playerInfo[0], int.Parse(playerInfo[1]));
+            string[] bombersInfo = packetParts[2].Split('|'); // bombersDict
+            bombersArray = new Bomber.BomberInfo[bombersInfo.Length];
+            for (int i = 0; i < bombersInfo.Length; i++) {
+                string[] bomberInfo = bombersInfo[i].Split(',');
+                bombersArray[i] = new Bomber.BomberInfo(bomberInfo[0], double.Parse(bomberInfo[1]), double.Parse(bomberInfo[2]), int.Parse(bomberInfo[3]));
             }
         }
 

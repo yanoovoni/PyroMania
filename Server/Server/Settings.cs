@@ -80,6 +80,7 @@ namespace Server {
                         }
                     }
             }
+            LoadTempSettings();
         }
 
         // Calls LoadSettings() with the settings file location
