@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour {
     public void StartServer(string args) {
         Process serverProcess = new Process();
         System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
-        startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + @"\Server\Server.exe";
+        startInfo.FileName = @"C:\Users\yanoovoni\Desktop\Pyromania\Server\Server.exe"; //startInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + @"\Server\Server.exe";
         startInfo.CreateNoWindow = true;
         startInfo.Arguments = args;
         serverProcess.StartInfo = startInfo;

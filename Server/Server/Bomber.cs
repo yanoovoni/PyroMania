@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace Server {
     public class Bomber {
         private string name; // The name of the bomber
-        private double x; // The x location of the bomber
-        private double y; // The y location of the bomber
+        private float x; // The x location of the bomber
+        private float y; // The y location of the bomber
         private int health; // The amount of health the bomber has left
 
-        public Bomber(string name, double x = 0, double y = 0) {
+        public Bomber(string name, float x = 0, float y = 0) {
             this.name = name;
             this.x = x;
             this.y = y;
@@ -24,18 +24,18 @@ namespace Server {
         }
 
         // Sets a given position to the bomber
-        public void SetPosition(double x, double y) {
+        public void SetPosition(float x, float y) {
             this.x = x;
             this.y = y;
         }
 
-        public void SetPosition(double[] position) {
+        public void SetPosition(float[] position) {
             SetPosition(position[0], position[1]);
         }
 
         // Returns the position of the bomber
-        public double[] GetPosition() {
-            return new double[] { x, y };
+        public float[] GetPosition() {
+            return new float[] { x, y };
         }
 
         // Makes the player lose 1 health and returns true if he is still alive

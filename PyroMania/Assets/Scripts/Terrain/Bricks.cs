@@ -2,7 +2,9 @@
 using System.Collections;
 
 public class Bricks : Tile {
-    public void BlowUp() {
-        GameManager.instance.mapManager.GetComponent<MapManager>().CreateTile("0", xPos, yPos);
+    public bool destroyed = false;
+
+    public void BlowUp(bool online) {
+        GameManager.instance.mapManager.GetComponent<MapManager>().CreateTile("0", xPos, yPos, online);
     }
 }

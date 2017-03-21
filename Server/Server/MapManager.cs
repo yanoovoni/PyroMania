@@ -148,7 +148,7 @@ namespace Server {
         // Spawns the bombers
         public void SpawnBombers() {
             for(int i = 0; i < bombers.Count; i++) {
-                bombers.ElementAt(i).SetPosition(new double[] { spawnLocs.ElementAt(i)[0], spawnLocs.ElementAt(i)[1] });
+                bombers.ElementAt(i).SetPosition(new float[] { spawnLocs.ElementAt(i)[0], spawnLocs.ElementAt(i)[1] });
             }
         }
     }

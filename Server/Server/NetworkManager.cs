@@ -77,7 +77,7 @@ namespace Server {
                 string message = Encoding.UTF8.GetString(udpSocket.Receive(ref IEP));
                 int[,] blownRocksLocations;
                 Bomb[] bombsArray;
-                double[] playerLocation;
+                float[] playerLocation;
                 Dictionary<string, int> playersHealthDict;
                 Protocol.AnalizeUDPPacket(message, out blownRocksLocations, out bombsArray, out playerLocation, out playersHealthDict);
                 for (int i = 0; i < blownRocksLocations.GetLength(0); i++) {
@@ -99,9 +99,12 @@ namespace Server {
 
         // Sends updates to all of the clients
         protected void UpdateClients() {
-            string updateData = Protocol.CreateUdpPacket();
-            foreach (IPEndPoint player in players.ToArray()) {
-                SendUdp(updateData, player);
+            while (true) {
+                string updateData = Protocol.CreateUdpPacket();
+                foreach (IPEndPoint player in players.ToArray()) {
+                    SendUdp(updateData, player);
+                }
+                Timer.Instance.Wait(1000 / 64);
             }
         }
 
@@ -204,7 +207,7 @@ namespace Server {
             }
 
             // Returns blown up rocks locations array, bomb objects array, player location and player's health array analyzed from the given packet
-            public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out double[] playerLocation, out Dictionary<string, int> playersHealthDict) {
+            public static void AnalizeUDPPacket(string packet, out int[,] blownRocksLocations, out Bomb[] bombsArray, out float[] playerLocation, out Dictionary<string, int> playersHealthDict) {
                 string[] packetParts = packet.Split(' ');
                 string[] blownRocks = packetParts[0].Split('|'); // blownRcoksLocations
                 blownRocksLocations = new int[blownRocks.Length, 2];
@@ -220,7 +223,7 @@ namespace Server {
                     bombsArray[i] = new Bomb(int.Parse(bombInfo[0]), int.Parse(bombInfo[1]), int.Parse(bombInfo[2]));
                 }
                 string[] playerLoc = packetParts[2].Split(','); // playerLocation
-                playerLocation = new double[2] { double.Parse(playerLoc[0]), double.Parse(playerLoc[1]) };
+                playerLocation = new float[2] { float.Parse(playerLoc[0]), float.Parse(playerLoc[1]) };
                 string[] playersHealth = packetParts[3].Split('|'); // playersHealthDict
                 playersHealthDict = new Dictionary<string, int>();
                 for (int i = 0; i < playersHealth.Length; i++) {
