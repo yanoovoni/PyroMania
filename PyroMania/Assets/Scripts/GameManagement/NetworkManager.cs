@@ -41,12 +41,13 @@ public class NetworkManager : MonoBehaviour {
     }
 
     // Connects to the given server
-    public bool Connect(string serverIp, int serverPort) {
+    public bool Connect(string name, string serverIp, int serverPort) {
         //TODO
         tcpSocket.Connect(serverIp, serverPort);
+
         return true;
     }
-
+    /*
     // Listens to the UDP messages from a given client
     protected void ListenUdp(IPEndPoint IEP, Bomber bomber) {
         //TODO
@@ -73,6 +74,7 @@ public class NetworkManager : MonoBehaviour {
             }
         }
     }
+    */
 
     // Sends updates to the server
     protected void UpdateServer() {
