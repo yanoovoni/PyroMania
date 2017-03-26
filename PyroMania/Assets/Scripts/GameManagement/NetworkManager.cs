@@ -108,7 +108,7 @@ public class NetworkManager : MonoBehaviour {
         public static bool AnalizeTcpHeader(string header, out int payloadSize) {
             payloadSize = 0;
             string[] headerLines = header.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
-            if (headerLines[0] != String.Format("Pyromania {0}\r\n", "1.0")) {
+            if (headerLines[0] != String.Format("Pyromania {0}", "1.0")) {
                 return false;
             }
             for (int i = 1; i < headerLines.Length; i++) {

@@ -20,6 +20,7 @@ namespace Server {
             Settings s = Settings.Instance;
             tcpListenerSocket = new TcpListener(new IPEndPoint(IPAddress.Parse(s.GetTempSetting("ip")), int.Parse(s.GetTempSetting("tcp_port")))); // Creates a new TCP listener socket according to the temp settings
             udpSocket = new UdpClient(new IPEndPoint(IPAddress.Parse(s.GetTempSetting("ip")), int.Parse(s.GetTempSetting("udp_port")))); // Creates a new UDP socket according to the temp settings
+            players = new List<IPEndPoint>();
             Thread thread = new Thread(() => ListenTcp());
             thread.IsBackground = true;
             thread.Start();
@@ -129,7 +130,7 @@ namespace Server {
             string errMessage = null;
             if (MapManager.Instance.SlotsLeft() <= 0) {
                 errMessage = "Server full";
-            } else if (MapManager.Instance.GetBomber(bomber.GetName()) == null) {
+            } else if (MapManager.Instance.GetBomber(bomber.GetName()) != null) {
                 errMessage = "Name taken";
             }
             if (errMessage == null) { // Bomber with that name does not exist so add this player to the game
@@ -169,7 +170,7 @@ namespace Server {
             public static bool AnalizeTcpHeader(string header, out int payloadSize) {
                 payloadSize = 0;
                 string[] headerLines = header.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
-                if (headerLines[0] != String.Format("Pyromania {0}\r\n", Settings.Instance.GetTempSetting("version"))) {
+                if (headerLines[0] != String.Format("Pyromania {0}", Settings.Instance.GetTempSetting("version"))) {
                     return false;
                 }
                 for (int i = 1; i < headerLines.Length; i++) {
@@ -226,8 +227,12 @@ namespace Server {
                     blownRocksLocations[i, 1] = int.Parse(rockLoc[1]);
                 }
                 string[] bombs = packetParts[1].Split('|'); // bombsArray
-                bombsArray = new Bomb[bombs.Length];
-                for (int i = 0; i < bombs.Length; i++) {
+                int bombsLength = 0;
+                if (bombs[0] != "") {
+                    bombsLength = bombs.Length;
+                }
+                bombsArray = new Bomb[bombsLength];
+                for (int i = 0; i < bombsLength; i++) {
                     string[] bombInfo = bombs[i].Split(',');
                     bombsArray[i] = new Bomb(int.Parse(bombInfo[0]), int.Parse(bombInfo[1]), int.Parse(bombInfo[2]));
                 }
@@ -256,7 +261,7 @@ namespace Server {
                 for (int i = 0; i < bombs.Count; i++) {
                     bombsStr += String.Format("{0}|", bombs.ElementAt(i).ToString());
                 }
-                bombsStr = bombsStr.Substring(0, bombsStr.Length - 1);
+                bombsStr = bombsStr.Substring(0, Math.Max(0, bombsStr.Length - 1));
                 string bombersStr = "";
                 List<Bomber> bombers = mm.GetBombers();
                 for (int i = 0; i < bombers.Count; i++) {
