@@ -20,6 +20,11 @@ public class Bomber : MonoBehaviour {
 
     }
 
+    // Returns the name of the bomber
+    public string GetName() {
+        return bomberName;
+    }
+
     // Sets the bomber position to the specified location on the map
     public void SetPosition(float xPos, float yPos) {
         this.xPos = xPos;

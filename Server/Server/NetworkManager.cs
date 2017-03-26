@@ -13,13 +13,16 @@ namespace Server {
         protected TcpListener tcpListenerSocket; // The TCP listener socket
         protected UdpClient udpSocket; // The UDP socket
         protected List<IPEndPoint> players; // List of the players ip addresses
+        protected bool gameStarted; // If the game has started
 
 
         protected NetworkManager() {
             Settings s = Settings.Instance;
             tcpListenerSocket = new TcpListener(new IPEndPoint(IPAddress.Parse(s.GetTempSetting("ip")), int.Parse(s.GetTempSetting("tcp_port")))); // Creates a new TCP listener socket according to the temp settings
             udpSocket = new UdpClient(new IPEndPoint(IPAddress.Parse(s.GetTempSetting("ip")), int.Parse(s.GetTempSetting("udp_port")))); // Creates a new UDP socket according to the temp settings
-
+            Thread thread = new Thread(() => ListenTcp());
+            thread.IsBackground = true;
+            thread.Start();
         }
 
         // Returns the instance of the singleton, creates a new one if there isn't one
@@ -34,10 +37,13 @@ namespace Server {
 
         // Listens to the TCP socket to accept new connections
         protected void ListenTcp() {
-            Socket tcpClient= tcpListenerSocket.AcceptSocket();
-            Thread thread = new Thread(() => HandleTcpClient(tcpClient));
-            thread.IsBackground = true;
-            thread.Start();
+            while (!gameStarted) {
+                tcpListenerSocket.Start();
+                Socket tcpClient = tcpListenerSocket.AcceptSocket();
+                Thread thread = new Thread(() => HandleTcpClient(tcpClient));
+                thread.IsBackground = true;
+                thread.Start();
+            }
         }
 
         // Receives one packet from a TCP socket
@@ -51,6 +57,7 @@ namespace Server {
             int payloadSize;
             Protocol.AnalizeTcpHeader(messageHeader, out payloadSize);
             byte[] payloadBuffer = new byte[payloadSize];
+            socket.Receive(payloadBuffer);
             return Encoding.UTF8.GetString(payloadBuffer);
         }
 
@@ -81,8 +88,8 @@ namespace Server {
                 Dictionary<string, int> playersHealthDict;
                 Protocol.AnalizeUDPPacket(message, out blownRocksLocations, out bombsArray, out playerLocation, out playersHealthDict);
                 for (int i = 0; i < blownRocksLocations.GetLength(0); i++) {
-                    int[] bombLoc = new int[] { blownRocksLocations[i, 0], blownRocksLocations[i, 1] };
-                    MapManager.Instance.DeleteBomb(bombLoc);
+                    int[] rockLoc = new int[] { blownRocksLocations[i, 0], blownRocksLocations[i, 1] };
+                    MapManager.Instance.DeleteRock(rockLoc);
                 }
                 foreach (Bomb bomb in bombsArray) {
                     MapManager.Instance.AddBomb(bomb);
@@ -117,6 +124,7 @@ namespace Server {
         // Adds a player to the network manager's list of players and the bomber to the map manager. If the bomber's name is taken does not add him. returns if successful and notifies the player
         protected bool AddPlayer(Socket playerSocket, Bomber bomber) {
             IPEndPoint player = playerSocket.RemoteEndPoint as IPEndPoint;
+            player.Port = 9001;
             string[,] responseMessage;
             string errMessage = null;
             if (MapManager.Instance.SlotsLeft() <= 0) {
@@ -145,6 +153,7 @@ namespace Server {
 
         // Starts the game
         public void StartGame() {
+            gameStarted = true;
             MapManager.Instance.SpawnBombers();
             Thread thread = new Thread(() => UpdateClients());
             thread.IsBackground = true;

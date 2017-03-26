@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour {
 
     // Loads the game
     public void LoadGame(string name, string ip, int port) {
+        SetToGame();
         CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");

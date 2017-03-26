@@ -201,6 +201,16 @@ public class MapManager : MonoBehaviour {
         return onlineBombers;
     }
 
+    // Returns the online bomber with the given name
+    public GameObject GetOnlineBomber(string bomberName) {
+        foreach (GameObject bomber in GetOnlineBombers()) {
+            if (bomber.GetComponent<Bomber>().GetName() == bomberName) {
+                return bomber;
+            }
+        }
+        return null;
+    }
+
     // Returns the locations where the tile of that type exists
     public List<int[]> GetTileLocs(Type type, bool online) {
         GameObject[,] mapInfo;

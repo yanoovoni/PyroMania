@@ -82,6 +82,15 @@ namespace Server {
             }
         }
 
+        // Deletes a the rock at the given location
+        public void DeleteRock(int[] rockLocation) {
+            if (rockLocation.Length != 2) {
+                Printer.Print("Bad rock location array length");
+            } else {
+                rockLocs.Remove(rockLocation);
+            }
+        }
+
         // Returns the bomber with the given name. Returns null if the bomber does not exist
         public Bomber GetBomber(string name) {
             for (int i = 0; i < bombers.Count; i++) {

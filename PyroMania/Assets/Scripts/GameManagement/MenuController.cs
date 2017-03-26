@@ -31,7 +31,6 @@ public class MenuController : MonoBehaviour {
 
     // Starts a multiplayer game using the ip address from the input field in the menu
     public void StartMultiplayer() {
-        //TODO
         string error = null;
         string name, ip;
         int port;
