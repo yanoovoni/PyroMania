@@ -11,7 +11,8 @@ namespace Server {
     public class NetworkManager {
         protected static NetworkManager instance; // The instance of the singleton
         protected TcpListener tcpListenerSocket; // The TCP listener socket
-        protected UdpClient udpSocket; // The UDP socket
+        protected UdpClient udpListenSocket; // The UDP socket
+        protected Socket udpSendSocket;
         protected List<IPEndPoint> players; // List of the players ip addresses
         protected bool gameStarted; // If the game has started
 
@@ -19,7 +20,8 @@ namespace Server {
         protected NetworkManager() {
             Settings s = Settings.Instance;
             tcpListenerSocket = new TcpListener(new IPEndPoint(IPAddress.Parse(s.GetTempSetting("ip")), int.Parse(s.GetTempSetting("tcp_port")))); // Creates a new TCP listener socket according to the temp settings
-            udpSocket = new UdpClient(new IPEndPoint(IPAddress.Parse(s.GetTempSetting("ip")), int.Parse(s.GetTempSetting("udp_port")))); // Creates a new UDP socket according to the temp settings
+            udpListenSocket = new UdpClient(int.Parse(s.GetTempSetting("udp_port"))); // Creates a new UDP socket according to the temp settings
+            udpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             players = new List<IPEndPoint>();
             Thread thread = new Thread(() => ListenTcp());
             thread.IsBackground = true;
@@ -81,8 +83,10 @@ namespace Server {
 
         // Listens to the UDP messages from a given client
         protected void ListenUdp(IPEndPoint IEP, Bomber bomber) {
+            IEP = new IPEndPoint(IEP.Address, 9001);
+            while (!gameStarted) { }
             while (true) {
-                string message = Encoding.UTF8.GetString(udpSocket.Receive(ref IEP));
+                string message = Encoding.UTF8.GetString(udpListenSocket.Receive(ref IEP));
                 int[,] blownRocksLocations;
                 Bomb[] bombsArray;
                 float[] playerLocation;
@@ -119,13 +123,13 @@ namespace Server {
         // Sends a UDP message to the client
         protected void SendUdp(string message, IPEndPoint client) {
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            udpSocket.Send(messageBytes, messageBytes.Length, client);
+            udpSendSocket.SendTo(messageBytes, client);
         }
 
         // Adds a player to the network manager's list of players and the bomber to the map manager. If the bomber's name is taken does not add him. returns if successful and notifies the player
         protected bool AddPlayer(Socket playerSocket, Bomber bomber) {
             IPEndPoint player = playerSocket.RemoteEndPoint as IPEndPoint;
-            player.Port = 9001;
+            player.Port = 9002;
             string[,] responseMessage;
             string errMessage = null;
             if (MapManager.Instance.SlotsLeft() <= 0) {
@@ -255,7 +259,7 @@ namespace Server {
                     int[] rockLoc = rockLocs.ElementAt(i);
                     rocksStr += String.Format("{0},{1}|", rockLoc[0], rockLoc[1]);
                 }
-                rocksStr = rocksStr.Substring(0, rocksStr.Length - 1);
+                rocksStr = rocksStr.Substring(0, Math.Max(0, rocksStr.Length - 1));
                 string bombsStr = "";
                 List<Bomb> bombs = mm.GetBombs();
                 for (int i = 0; i < bombs.Count; i++) {

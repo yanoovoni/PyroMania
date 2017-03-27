@@ -14,6 +14,9 @@ public class GameManager : MonoBehaviour {
     public GameObject[] controllers; // The controllers
     public static int menuControllerIndex = 0; // The index of the menu controller
     public static int gameControllerIndex = 1; // The index of the game controller
+    protected string bomberName;
+    protected string ip;
+    protected int port;
 
 
     // Use this for initialization
@@ -34,14 +37,21 @@ public class GameManager : MonoBehaviour {
 
     }
 
+    // Sets the server data to the given data
+    public void SetServerData(string name, string ip, int port) {
+        this.bomberName = name;
+        this.ip = ip;
+        this.port = port;
+    }
+
     // Loads the game
-    public void LoadGame(string name, string ip, int port) {
-        SetToGame();
+    public void LoadGame() {
         CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");
         networkManager.Connect(name, ip, port);
         camera.ShowAllLayers();
+        Destroy(GameObject.Find("Loading_Screen_Spr"));
     }
 
     // Starts the game scene

@@ -22,7 +22,7 @@ public class MapManager : MonoBehaviour {
     // Loads the map from the file in the given location.
     public bool LoadMap(string mapData) {
         try {
-            string[] newLine = { "\r\n" };
+            string[] newLine = { "\n" };
             string[] mapFileLines = mapData.Split(newLine, StringSplitOptions.RemoveEmptyEntries);
             string[] stringMapSize = mapFileLines[0].Split(' ');
             int[] mapSize = { int.Parse(stringMapSize[0]), int.Parse(stringMapSize[1]) };
@@ -71,7 +71,7 @@ public class MapManager : MonoBehaviour {
 
     // Changes a specified tile on the map to the specified tile
     public void SetTile(int xPos, int yPos, GameObject tile, bool online) {
-        if (online && !onlineMapInfo[yPos, xPos].GetComponent<Tile>().Equals(tile.GetComponent<Tile>())) {
+        if (online && (onlineMapInfo[yPos, xPos] == null || !onlineMapInfo[yPos, xPos].GetComponent<Tile>().Equals(tile.GetComponent<Tile>()))) {
             if (offlineMapInfo[yPos, xPos] != null) {
                 Destroy(offlineMapInfo[yPos, xPos]);
             }
@@ -81,7 +81,7 @@ public class MapManager : MonoBehaviour {
             }
             onlineMapInfo[yPos, xPos] = tile;
             tile.GetComponent<Tile>().SetLoc(xPos, yPos);
-        } else if (!online && !offlineMapInfo[yPos, xPos].GetComponent<Tile>().Equals(tile.GetComponent<Tile>())) {
+        } else if (!online && (offlineMapInfo[yPos, xPos] == null || !offlineMapInfo[yPos, xPos].GetComponent<Tile>().Equals(tile.GetComponent<Tile>()))) {
             if (offlineMapInfo[yPos, xPos] != null) {
                 Destroy(offlineMapInfo[yPos, xPos]);
             }

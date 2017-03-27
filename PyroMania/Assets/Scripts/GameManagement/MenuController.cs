@@ -24,9 +24,11 @@ public class MenuController : MonoBehaviour {
         StartMultiplayer("Player", "127.0.0.1", 9000);
     }
 
-    // Starts a multiplayer game using the given ip
+    // Starts a multiplayer game using the given name, ip and port
     public void StartMultiplayer(string name, string ip, int port) {
-        GameManager.instance.LoadGame(name, ip, port);
+        GameManager gameManager = GameManager.instance;
+        gameManager.SetServerData(name, ip, port);
+        gameManager.SetToGame();
     }
 
     // Starts a multiplayer game using the ip address from the input field in the menu

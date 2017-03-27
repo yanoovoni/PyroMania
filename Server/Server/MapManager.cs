@@ -29,7 +29,7 @@ namespace Server {
         // Loads the map from the file in the given location.
         public bool LoadMap(string mapName) {
             try {
-                string[] newLine = { "\r\n" };
+                string[] newLine = { "\n" };
                 StreamReader mapFile = File.OpenText(AppDomain.CurrentDomain.BaseDirectory + @"\Files\Maps\" + mapName + ".pmm");
                 if (mapFile == null) {
                     Printer.Print("Map file not found");

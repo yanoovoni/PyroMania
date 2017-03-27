@@ -6,11 +6,13 @@ using System.Net;
 using System;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 public class NetworkManager : MonoBehaviour {
     protected Socket tcpSocket; // The TCP socket
     protected UdpClient udpSocket; // The UDP socket
     protected IPEndPoint udpIPEndPoint; // The address that the udp socket recieves from
+    protected string myBomberName; // The name of the offline bomber
 
     // Use this for initialization
     void Start () {
@@ -44,6 +46,7 @@ public class NetworkManager : MonoBehaviour {
 
     // Connects to the given server
     public bool Connect(string name, string serverIp, int serverPort) {
+        myBomberName = name;
         tcpSocket.Connect(serverIp, serverPort);
         string[,] messageInfo = new string[1, 2] { { "Name", name } };
         SendTcp(Protocol.CreateTcpPacket(messageInfo));
@@ -52,8 +55,11 @@ public class NetworkManager : MonoBehaviour {
             if (messageInfo[0, 1] == "Success") {
                 if (messageInfo[1, 0] == "Map") {
                     GameManager.instance.mapManager.LoadMap(messageInfo[1, 1]);
-                    udpIPEndPoint = new IPEndPoint(IPAddress.Parse(serverIp), 9001);
+                    udpIPEndPoint = new IPEndPoint(IPAddress.Parse(serverIp), 9002);
                     udpSocket.Connect(serverIp, serverPort + 1);
+                    Thread thread = new Thread(() => ListenUdp());
+                    thread.IsBackground = true;
+                    thread.Start();
                     return true;
                 }
             } else {
@@ -69,14 +75,15 @@ public class NetworkManager : MonoBehaviour {
     protected void ListenUdp() {
         while (true) {
             string message = Encoding.UTF8.GetString(udpSocket.Receive(ref udpIPEndPoint));
-            int[,] blownWallsLocations;
+            int[,] blownBricksLocations;
             GameObject[] bombsArray;
             Bomber.BomberInfo[] bombersArray;
-            Protocol.AnalizeUDPPacket(message, out blownWallsLocations, out bombsArray, out bombersArray);
-            for (int i = 0; i < blownWallsLocations.GetLength(0); i++) {
-                GameManager.instance.mapManager.CreateTile("0", blownWallsLocations[i, 0], blownWallsLocations[i, 1], true);
+            Protocol.AnalizeUDPPacket(message, out blownBricksLocations, out bombsArray, out bombersArray);
+            for (int i = 0; i < blownBricksLocations.GetLength(0); i++) {
+                GameManager.instance.mapManager.CreateTile("0", blownBricksLocations[i, 0], blownBricksLocations[i, 1], true);
             }
             foreach (Bomber.BomberInfo curBomberInfo in bombersArray) {
+                //if()
                 GameObject curBomber = GameManager.instance.mapManager.GetOnlineBomber(curBomberInfo.bomberName);
                 curBomber.GetComponent<Bomber>().SetInfo(curBomberInfo);
             }
@@ -95,7 +102,8 @@ public class NetworkManager : MonoBehaviour {
     // Sends a UDP message to the server
     protected void SendUdp(string message) {
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-        udpSocket.Send(messageBytes, messageBytes.Length);
+        IPEndPoint IEP = new IPEndPoint(udpIPEndPoint.Address, 9001);
+        udpSocket.Send(messageBytes, messageBytes.Length, IEP);
     }
 
 
@@ -198,13 +206,17 @@ public class NetworkManager : MonoBehaviour {
                 bombsStr += String.Format("{0}|", bombsInfo.ElementAt(i));
             }
             bombsStr = bombsStr.Substring(0, bombsStr.Length - 1);
-            string bombersStr = "";
-            List<string> bombersInfo = mm.GetBombersInfo();
-            for (int i = 0; i < bombersInfo.Count; i++) {
-                bombersStr += String.Format("{0}|", bombersInfo.ElementAt(i));
+            string bomberPosStr = "";
+            float[] bombersInfo = mm.GetOfflineBomber().GetComponent<Bomber>().GetPosition();
+            bomberPosStr = String.Format("{0},{1}", bombersInfo[0], bombersInfo[1]);
+            string bombersHealthStr = "";
+            GameObject[] onlineBombers = mm.GetOnlineBombers();
+            for (int i = 0; i < onlineBombers.Length; i++) {
+                Bomber curBomber = onlineBombers[i].GetComponent<Bomber>();
+                bombersHealthStr += String.Format("{0},{1}|", curBomber.GetName(), curBomber.GetLives());
             }
-            bombersStr = bombersStr.Substring(0, bombersStr.Length - 1);
-            string packet = String.Format("{0} {1} {2}", wallsStr, bombsStr, bombersStr);
+            bombersHealthStr = bombersHealthStr.Substring(0, bombersHealthStr.Length - 1);
+            string packet = String.Format("{0} {1} {2} {3}", wallsStr, bombsStr, bomberPosStr, bombersHealthStr);
             return packet;
         }
     }
