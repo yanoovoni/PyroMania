@@ -16,8 +16,9 @@ public class MapManager : MonoBehaviour {
     public GameObject wallTile; // A wall tile game object
     public GameObject missingTile; // A missing tile game object
     public GameObject bombTile; // A bomb tile game object
+    public GameObject bomberObject; // A bomber game object
     public GameObject offlineBomber; // The offline bomber game object
-    public GameObject[] onlineBombers; // The online bomber game objects
+    public List<GameObject> onlineBombers; // The online bomber game objects
 
     // Loads the map from the file in the given location.
     public bool LoadMap(string mapData) {
@@ -185,9 +186,10 @@ public class MapManager : MonoBehaviour {
 
     // Returns all of the bombers
     public GameObject[] GetBombers() {
-        GameObject[] bombersArr = new GameObject[onlineBombers.Length + 1];
-        Array.Copy(onlineBombers, bombersArr, onlineBombers.Length);
-        onlineBombers[onlineBombers.Length - 1] = offlineBomber;
+        GameObject[] onlineBombersArray = GetOnlineBombers();
+        GameObject[] bombersArr = new GameObject[onlineBombersArray.Length + 1];
+        Array.Copy(onlineBombersArray, bombersArr, onlineBombersArray.Length);
+        onlineBombersArray[onlineBombersArray.Length - 1] = offlineBomber;
         return bombersArr;
     }
 
@@ -198,7 +200,7 @@ public class MapManager : MonoBehaviour {
 
     // Returns the online bomber array
     public GameObject[] GetOnlineBombers() {
-        return onlineBombers;
+        return onlineBombers.ToArray();
     }
 
     // Returns the online bomber with the given name
@@ -209,6 +211,21 @@ public class MapManager : MonoBehaviour {
             }
         }
         return null;
+    }
+
+    // Creates a bomber and saves it on the map
+    public void CreateBomber(Bomber.BomberInfo bomberInfo, bool online) {
+        GameObject bomber = Instantiate(bomberObject);
+        bomber.GetComponent<Bomber>().SetInfo(bomberInfo);
+        if (online) {
+            onlineBombers.Add(bomber);
+        } else {
+            offlineBomber = bomber;
+        }
+    }
+
+    public void CreateBomber(string bomberName, float xPos, float yPos, bool online) {
+        CreateBomber(new Bomber.BomberInfo(bomberName, xPos, yPos), online);
     }
 
     // Returns the locations where the tile of that type exists

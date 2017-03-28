@@ -73,6 +73,7 @@ public class NetworkManager : MonoBehaviour {
 
     // Listens to the UDP messages from the server
     protected void ListenUdp() {
+        MapManager mm = GameManager.instance.mapManager;
         while (true) {
             string message = Encoding.UTF8.GetString(udpSocket.Receive(ref udpIPEndPoint));
             int[,] blownBricksLocations;
@@ -80,12 +81,21 @@ public class NetworkManager : MonoBehaviour {
             Bomber.BomberInfo[] bombersArray;
             Protocol.AnalizeUDPPacket(message, out blownBricksLocations, out bombsArray, out bombersArray);
             for (int i = 0; i < blownBricksLocations.GetLength(0); i++) {
-                GameManager.instance.mapManager.CreateTile("0", blownBricksLocations[i, 0], blownBricksLocations[i, 1], true);
+                mm.CreateTile("0", blownBricksLocations[i, 0], blownBricksLocations[i, 1], true);
             }
             foreach (Bomber.BomberInfo curBomberInfo in bombersArray) {
-                //if()
-                GameObject curBomber = GameManager.instance.mapManager.GetOnlineBomber(curBomberInfo.bomberName);
-                curBomber.GetComponent<Bomber>().SetInfo(curBomberInfo);
+                if (curBomberInfo.bomberName == myBomberName) {
+                    if (mm.offlineBomber == null) {
+                        mm.CreateBomber(curBomberInfo, false);
+                    }
+                } else {
+                    GameObject curBomber = mm.GetOnlineBomber(curBomberInfo.bomberName);
+                    if (curBomber == null) {
+                        mm.CreateBomber(curBomberInfo, true);
+                    } else {
+                        curBomber.GetComponent<Bomber>().SetInfo(curBomberInfo);
+                    }
+                }
             }
         }
     }

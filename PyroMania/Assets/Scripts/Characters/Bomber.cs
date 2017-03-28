@@ -83,12 +83,28 @@ public class Bomber : MonoBehaviour {
         public int maxBombs; // The maximum amount of bombs that the bomber can place
         public int lives; // The amount of lives the bomber has
 
+        public BomberInfo(string bomberName, float xPos, float yPos) {
+            this.bomberName = bomberName;
+            this.xPos = xPos;
+            this.yPos = yPos;
+            maxBombs = 2;
+            lives = 3;
+        }
+
         public BomberInfo(string bomberName, float xPos, float yPos, int lives) {
             this.bomberName = bomberName;
             this.xPos = xPos;
             this.yPos = yPos;
             maxBombs = 2;
             this.lives = lives;
+        }
+
+        public BomberInfo(string bomberName, float[] position) {
+            this.bomberName = bomberName;
+            xPos = position[0];
+            yPos = position[1];
+            maxBombs = 2;
+            lives = 3;
         }
 
         public BomberInfo(string bomberName, float[] position, int lives) {
