@@ -13,6 +13,7 @@ public class NetworkManager : MonoBehaviour {
     protected UdpClient udpSocket; // The UDP socket
     protected IPEndPoint udpIPEndPoint; // The address that the udp socket recieves from
     protected string myBomberName; // The name of the offline bomber
+    protected bool gameStarted = false; // Specifies if the game has started or not
 
     // Use this for initialization
     void Start () {
@@ -57,9 +58,12 @@ public class NetworkManager : MonoBehaviour {
                     GameManager.instance.mapManager.LoadMap(messageInfo[1, 1]);
                     udpIPEndPoint = new IPEndPoint(IPAddress.Parse(serverIp), 9002);
                     udpSocket.Connect(serverIp, serverPort + 1);
-                    Thread thread = new Thread(() => ListenUdp());
-                    thread.IsBackground = true;
-                    thread.Start();
+                    Thread listenThread = new Thread(() => ListenUdp());
+                    listenThread.IsBackground = true;
+                    listenThread.Start();
+                    Thread updateThread = new Thread(() => UpdateServer());
+                    updateThread.IsBackground = true;
+                    updateThread.Start();
                     return true;
                 }
             } else {
@@ -76,12 +80,22 @@ public class NetworkManager : MonoBehaviour {
         MapManager mm = GameManager.instance.mapManager;
         while (true) {
             string message = Encoding.UTF8.GetString(udpSocket.Receive(ref udpIPEndPoint));
-            int[,] blownBricksLocations;
+            gameStarted = true;
+            int[,] newBricksLocations;
+            List<int[]> oldBricksLocations = mm.GetTileLocs(typeof(Bricks), true);
             GameObject[] bombsArray;
             Bomber.BomberInfo[] bombersArray;
-            Protocol.AnalizeUDPPacket(message, out blownBricksLocations, out bombsArray, out bombersArray);
-            for (int i = 0; i < blownBricksLocations.GetLength(0); i++) {
-                mm.CreateTile("0", blownBricksLocations[i, 0], blownBricksLocations[i, 1], true);
+            Protocol.AnalizeUDPPacket(message, out newBricksLocations, out bombsArray, out bombersArray);
+            foreach (int[] curBrickLoc in oldBricksLocations) {
+                bool brickFound = false;
+                for (int i = 0; i < newBricksLocations.Length; i++) {
+                    if (newBricksLocations[i, 0] == curBrickLoc[0] && newBricksLocations[i, 1] == curBrickLoc[1]) {
+                        brickFound = true;
+                    }
+                }
+                if (!brickFound) {
+                    mm.GetTile(curBrickLoc[0], curBrickLoc[1]).GetComponent<Bricks>().BlowUp(true);
+                }
             }
             foreach (Bomber.BomberInfo curBomberInfo in bombersArray) {
                 if (curBomberInfo.bomberName == myBomberName) {
@@ -102,6 +116,8 @@ public class NetworkManager : MonoBehaviour {
 
     // Sends updates to the server
     protected void UpdateServer() {
+        while (!gameStarted) { GameManager.instance.timer.Wait(1000 / 64); }
+        GameManager.instance.timer.StartTimer();
         while (true) {
             string updateData = Protocol.CreateUdpPacket();
             SendUdp(updateData);
@@ -172,16 +188,16 @@ public class NetworkManager : MonoBehaviour {
             return packet;
         }
 
-        // Returns blown up walls locations array, bomb objects array, player location and player's health array analyzed from the given packet
-        public static void AnalizeUDPPacket(string packet, out int[,] blownWallsLocations, out GameObject[] bombsArray, out Bomber.BomberInfo[] bombersArray) {
+        // Returns bricks locations array, bomb objects array, player location and player's health array analyzed from the given packet
+        public static void AnalizeUDPPacket(string packet, out int[,] BricksLocations, out GameObject[] bombsArray, out Bomber.BomberInfo[] bombersArray) {
             MapManager mapManager = GameManager.instance.mapManager.GetComponent<MapManager>();
             string[] packetParts = packet.Split(' ');
-            string[] blownWalls = packetParts[0].Split('|'); // blownRocksLocations
-            blownWallsLocations = new int[blownWalls.Length, 2];
-            for (int i = 0; i < blownWalls.Length; i++) {
-                string[] rockLoc = blownWalls[i].Split(',');
-                blownWallsLocations[i, 0] = int.Parse(rockLoc[0]);
-                blownWallsLocations[i, 1] = int.Parse(rockLoc[1]);
+            string[] Bricks = packetParts[0].Split('|'); // BricksLocations
+            BricksLocations = new int[Bricks.Length, 2];
+            for (int i = 0; i < Bricks.Length; i++) {
+                string[] brickLoc = Bricks[i].Split(',');
+                BricksLocations[i, 0] = int.Parse(brickLoc[0]);
+                BricksLocations[i, 1] = int.Parse(brickLoc[1]);
             }
             string[] bombs = packetParts[1].Split('|'); // bombsArray
             bombsArray = new GameObject[bombs.Length];
@@ -200,16 +216,19 @@ public class NetworkManager : MonoBehaviour {
             }
         }
 
-        // Creates a server UDP packet from the walls locations, bomb objects and bomber objects
+        // Creates a server UDP packet from the bricks locations, bomb objects and bomber objects
         public static string CreateUdpPacket() {
             MapManager mm = GameManager.instance.mapManager;
-            string wallsStr = "";
-            List<int[]> wallLocs = mm.GetTileLocs(typeof(Wall), false);
-            for (int i = 0; i < wallLocs.Count; i++) {
-                int[] wallLoc = wallLocs.ElementAt(i);
-                wallsStr += String.Format("{0},{1}|", wallLoc[0], wallLoc[1]);
+            string blownBricksStr = "";
+            List<int[]> offlineGroundLocs = mm.GetTileLocs(typeof(Ground), false);
+            List<int[]> onlineBricksLocs = mm.GetTileLocs(typeof(Wall), true);
+            for (int i = 0; i < offlineGroundLocs.Count; i++) {
+                int[] offlineGroundLoc = offlineGroundLocs.ElementAt(i);
+                if (onlineBricksLocs.Contains(offlineGroundLoc)) {
+                    blownBricksStr += String.Format("{0},{1}|", offlineGroundLoc[0], offlineGroundLoc[1]);
+                }
             }
-            wallsStr = wallsStr.Substring(0, wallsStr.Length - 1);
+            blownBricksStr = blownBricksStr.Substring(0, blownBricksStr.Length - 1);
             string bombsStr = "";
             List<string> bombsInfo = mm.GetBombsInfo(false);
             for (int i = 0; i < bombsInfo.Count; i++) {
@@ -226,7 +245,7 @@ public class NetworkManager : MonoBehaviour {
                 bombersHealthStr += String.Format("{0},{1}|", curBomber.GetName(), curBomber.GetLives());
             }
             bombersHealthStr = bombersHealthStr.Substring(0, bombersHealthStr.Length - 1);
-            string packet = String.Format("{0} {1} {2} {3}", wallsStr, bombsStr, bomberPosStr, bombersHealthStr);
+            string packet = String.Format("{0} {1} {2} {3}", blownBricksStr, bombsStr, bomberPosStr, bombersHealthStr);
             return packet;
         }
     }
