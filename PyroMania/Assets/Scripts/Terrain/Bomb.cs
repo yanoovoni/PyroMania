@@ -14,6 +14,11 @@ public class Bomb : Tile {
         fuseThread.Start();
     }
 
+    // Called when the object is destroyed
+    private void OnDestroy() {
+        fuseThread.Abort();
+    }
+
     // Returns the location of the bomb
     public int[] GetLocation() {
         return new int[] { xPos, yPos };

@@ -14,6 +14,7 @@ public class NetworkManager : MonoBehaviour {
     protected IPEndPoint udpIPEndPoint; // The address that the udp socket recieves from
     protected string myBomberName; // The name of the offline bomber
     protected bool gameStarted = false; // Specifies if the game has started or not
+    protected List<Thread> threads = new List<Thread>(); // Contains the object's threads
 
     // Use this for initialization
     void Start () {
@@ -23,6 +24,15 @@ public class NetworkManager : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+    }
+
+    // Called when the object is destroyed
+    private void OnDestroy() {
+        tcpSocket.Close();
+        udpSocket.Close();
+        foreach (Thread thread in threads) {
+            thread.Abort();
+        }
     }
 
     // Receives one packet from a TCP socket
@@ -61,9 +71,11 @@ public class NetworkManager : MonoBehaviour {
                     Thread listenThread = new Thread(() => ListenUdp());
                     listenThread.IsBackground = true;
                     listenThread.Start();
+                    threads.Add(listenThread);
                     Thread updateThread = new Thread(() => UpdateServer());
                     updateThread.IsBackground = true;
                     updateThread.Start();
+                    threads.Add(updateThread);
                     return true;
                 }
             } else {
