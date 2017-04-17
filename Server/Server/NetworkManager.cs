@@ -83,7 +83,7 @@ namespace Server {
 
         // Listens to the UDP messages from a given client
         protected void ListenUdp(IPEndPoint IEP, Bomber bomber) {
-            IEP = new IPEndPoint(IEP.Address, 9001);
+            IEP = new IPEndPoint(IEP.Address, int.Parse(Settings.Instance.GetTempSetting("udp_port")));
             while (!gameStarted) { }
             while (true) {
                 string message = Encoding.UTF8.GetString(udpListenSocket.Receive(ref IEP));

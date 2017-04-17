@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameLoader : MonoBehaviour {
 
     // Use this for initialization
-    void Awake () {
+    void Start () {
         GameManager.instance.LoadGame();
     }
 

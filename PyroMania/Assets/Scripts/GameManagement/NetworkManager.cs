@@ -10,16 +10,22 @@ using System.Threading;
 
 public class NetworkManager : MonoBehaviour {
     protected Socket tcpSocket; // The TCP socket
-    protected UdpClient udpSocket; // The UDP socket
+    protected UdpClient udpReceiveSocket; // The UDP receive socket
+    protected Socket udpSendSocket; // The UDP send socket
+    protected IPEndPoint udpBindIPEndPoint; // The address that the udp socket binds to
     protected IPEndPoint udpIPEndPoint; // The address that the udp socket recieves from
     protected string myBomberName; // The name of the offline bomber
-    protected bool gameStarted = false; // Specifies if the game has started or not
-    protected List<Thread> threads = new List<Thread>(); // Contains the object's threads
+    protected bool gameStarted; // Specifies if the game has started or not
+    protected List<Thread> threads; // Contains the object's threads
 
     // Use this for initialization
-    void Start () {
+    void Awake () {
         tcpSocket = new Socket(IPAddress.Any.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        udpSocket = new UdpClient();
+        udpReceiveSocket = new UdpClient();
+        udpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        udpBindIPEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), 9002);
+        gameStarted = false;
+        threads = new List<Thread>();
     }
 
     // Update is called once per frame
@@ -29,7 +35,7 @@ public class NetworkManager : MonoBehaviour {
     // Called when the object is destroyed
     private void OnDestroy() {
         tcpSocket.Close();
-        udpSocket.Close();
+        udpReceiveSocket.Close();
         foreach (Thread thread in threads) {
             thread.Abort();
         }
@@ -65,9 +71,10 @@ public class NetworkManager : MonoBehaviour {
         if (messageInfo[0, 0] == "Connection") {
             if (messageInfo[0, 1] == "Success") {
                 if (messageInfo[1, 0] == "Map") {
+                    udpReceiveSocket.Client.Bind(udpBindIPEndPoint);
                     GameManager.instance.mapManager.LoadMap(messageInfo[1, 1]);
                     udpIPEndPoint = new IPEndPoint(IPAddress.Parse(serverIp), 9002);
-                    udpSocket.Connect(serverIp, serverPort + 1);
+                    udpReceiveSocket.Connect(serverIp, serverPort + 1);
                     Thread listenThread = new Thread(() => ListenUdp());
                     listenThread.IsBackground = true;
                     listenThread.Start();
@@ -90,8 +97,9 @@ public class NetworkManager : MonoBehaviour {
     // Listens to the UDP messages from the server
     protected void ListenUdp() {
         MapManager mm = GameManager.instance.mapManager;
+        print("lel");
         while (true) {
-            string message = Encoding.UTF8.GetString(udpSocket.Receive(ref udpIPEndPoint));
+            string message = Encoding.UTF8.GetString(udpReceiveSocket.Receive(ref udpIPEndPoint));
             gameStarted = true;
             int[,] newBricksLocations;
             List<int[]> oldBricksLocations = mm.GetTileLocs(typeof(Bricks), true);
@@ -128,7 +136,9 @@ public class NetworkManager : MonoBehaviour {
 
     // Sends updates to the server
     protected void UpdateServer() {
-        while (!gameStarted) { GameManager.instance.timer.Wait(1000 / 64); }
+        while (!gameStarted) {
+            Thread.Sleep(1000 / 64);
+        }
         GameManager.instance.timer.StartTimer();
         while (true) {
             string updateData = Protocol.CreateUdpPacket();
@@ -141,7 +151,7 @@ public class NetworkManager : MonoBehaviour {
     protected void SendUdp(string message) {
         byte[] messageBytes = Encoding.UTF8.GetBytes(message);
         IPEndPoint IEP = new IPEndPoint(udpIPEndPoint.Address, 9001);
-        udpSocket.Send(messageBytes, messageBytes.Length, IEP);
+        udpSendSocket.SendTo(messageBytes, IEP);
     }
 
 
@@ -202,7 +212,7 @@ public class NetworkManager : MonoBehaviour {
 
         // Returns bricks locations array, bomb objects array, player location and player's health array analyzed from the given packet
         public static void AnalizeUDPPacket(string packet, out int[,] BricksLocations, out GameObject[] bombsArray, out Bomber.BomberInfo[] bombersArray) {
-            MapManager mapManager = GameManager.instance.mapManager.GetComponent<MapManager>();
+            MapManager mapManager = GameManager.instance.mapManager;
             string[] packetParts = packet.Split(' ');
             string[] Bricks = packetParts[0].Split('|'); // BricksLocations
             BricksLocations = new int[Bricks.Length, 2];
