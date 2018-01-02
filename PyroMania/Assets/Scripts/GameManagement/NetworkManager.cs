@@ -21,9 +21,8 @@ public class NetworkManager : MonoBehaviour {
     // Use this for initialization
     void Awake () {
         tcpSocket = new Socket(IPAddress.Any.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        udpReceiveSocket = new UdpClient();
+        udpReceiveSocket = new UdpClient(9002);
         udpSendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        udpBindIPEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), 9002);
         gameStarted = false;
         threads = new List<Thread>();
     }
@@ -71,9 +70,8 @@ public class NetworkManager : MonoBehaviour {
         if (messageInfo[0, 0] == "Connection") {
             if (messageInfo[0, 1] == "Success") {
                 if (messageInfo[1, 0] == "Map") {
-                    udpReceiveSocket.Client.Bind(udpBindIPEndPoint);
                     GameManager.instance.mapManager.LoadMap(messageInfo[1, 1]);
-                    udpIPEndPoint = new IPEndPoint(IPAddress.Parse(serverIp), 9002);
+                    udpIPEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     udpReceiveSocket.Connect(serverIp, serverPort + 1);
                     Thread listenThread = new Thread(() => ListenUdp());
                     listenThread.IsBackground = true;
@@ -221,7 +219,8 @@ public class NetworkManager : MonoBehaviour {
                 BricksLocations[i, 0] = int.Parse(brickLoc[0]);
                 BricksLocations[i, 1] = int.Parse(brickLoc[1]);
             }
-            string[] bombs = packetParts[1].Split('|'); // bombsArray
+            char[] bombsSeparator = { '|' };
+            string[] bombs = packetParts[1].Split(bombsSeparator, StringSplitOptions.RemoveEmptyEntries); // bombsArray
             bombsArray = new GameObject[bombs.Length];
             for (int i = 0; i < bombs.Length; i++) {
                 string[] bombInfo = bombs[i].Split(',');
