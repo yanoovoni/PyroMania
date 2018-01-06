@@ -160,8 +160,9 @@ namespace Server {
         public void StartGame() {
             gameStarted = true;
             MapManager.Instance.SpawnBombers();
-            Thread thread = new Thread(() => UpdateClients());
-            thread.IsBackground = true;
+            Thread thread = new Thread(() => UpdateClients()) {
+                IsBackground = true
+            };
             thread.Start();
         }
 

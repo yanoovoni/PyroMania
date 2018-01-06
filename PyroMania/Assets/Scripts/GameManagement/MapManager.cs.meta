@@ -1,10 +1,22 @@
 fileFormatVersion: 2
 guid: f7b6cb8d4928e8f43a93f9079e51d545
-timeCreated: 1483527654
+timeCreated: 1515270060
 licenseType: Free
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - groundTile: {fileID: 1942412281578302, guid: 38cd98389000a8c488de9c67f0beec44,
+      type: 2}
+  - bricksTile: {fileID: 1888092169044280, guid: 60ebb2eae62762e479905e23ba7ed421,
+      type: 2}
+  - wallTile: {fileID: 1319820020724058, guid: 9e75b88712390f546bb953ed182d759c, type: 2}
+  - missingTile: {fileID: 1000013066650808, guid: ddc6e3fa3abb91c45878cdd5a99c9efc,
+      type: 2}
+  - bombTile: {fileID: 1808799596653858, guid: 939066bc20847f1498feee5e88129e74, type: 2}
+  - bomberObject: {fileID: 1000011540346662, guid: 12ed97620641e0148938a3c6beca15a1,
+      type: 2}
+  - offlineBomber: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

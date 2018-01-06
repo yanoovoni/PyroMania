@@ -73,12 +73,10 @@ public class NetworkManager : MonoBehaviour {
                     GameManager.instance.mapManager.LoadMap(messageInfo[1, 1]);
                     udpIPEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     udpReceiveSocket.Connect(serverIp, serverPort + 1);
-                    Thread listenThread = new Thread(() => ListenUdp());
-                    listenThread.IsBackground = true;
-                    listenThread.Start();
-                    threads.Add(listenThread);
-                    Thread updateThread = new Thread(() => UpdateServer());
-                    updateThread.IsBackground = true;
+                    ListenUdp();
+                    Thread updateThread = new Thread(() => UpdateServer()) {
+                        IsBackground = true
+                    };
                     updateThread.Start();
                     threads.Add(updateThread);
                     return true;
@@ -95,41 +93,57 @@ public class NetworkManager : MonoBehaviour {
     // Listens to the UDP messages from the server
     protected void ListenUdp() {
         MapManager mm = GameManager.instance.mapManager;
-        print("lel");
-        while (true) {
-            string message = Encoding.UTF8.GetString(udpReceiveSocket.Receive(ref udpIPEndPoint));
-            gameStarted = true;
-            int[,] newBricksLocations;
-            List<int[]> oldBricksLocations = mm.GetTileLocs(typeof(Bricks), true);
-            GameObject[] bombsArray;
-            Bomber.BomberInfo[] bombersArray;
-            Protocol.AnalizeUDPPacket(message, out newBricksLocations, out bombsArray, out bombersArray);
-            foreach (int[] curBrickLoc in oldBricksLocations) {
-                bool brickFound = false;
-                for (int i = 0; i < newBricksLocations.Length; i++) {
-                    if (newBricksLocations[i, 0] == curBrickLoc[0] && newBricksLocations[i, 1] == curBrickLoc[1]) {
-                        brickFound = true;
+        InitGame(Encoding.UTF8.GetString(udpReceiveSocket.Receive(ref udpIPEndPoint)));
+        Thread listenThread = new Thread(() => {
+            while (true) {
+                string updateMessage = Encoding.UTF8.GetString(udpReceiveSocket.Receive(ref udpIPEndPoint));
+                int[,] newBricksLocations;
+                List<int[]> oldBricksLocations = mm.GetTileLocs(typeof(Bricks), true);
+                GameObject[] bombsArray;
+                Bomber.BomberInfo[] bombersArray;
+                Protocol.AnalizeUDPPacket(updateMessage, out newBricksLocations, out bombsArray, out bombersArray);
+                foreach (int[] curBrickLoc in oldBricksLocations) {
+                    bool brickFound = false;
+                    for (int i = 0; i < newBricksLocations.Length; i++) {
+                        if (newBricksLocations[i, 0] == curBrickLoc[0] && newBricksLocations[i, 1] == curBrickLoc[1]) {
+                            brickFound = true;
+                        }
+                    }
+                    if (!brickFound) {
+                        mm.GetTile(curBrickLoc[0], curBrickLoc[1]).GetComponent<Bricks>().BlowUp(true);
                     }
                 }
-                if (!brickFound) {
-                    mm.GetTile(curBrickLoc[0], curBrickLoc[1]).GetComponent<Bricks>().BlowUp(true);
-                }
-            }
-            foreach (Bomber.BomberInfo curBomberInfo in bombersArray) {
-                if (curBomberInfo.bomberName == myBomberName) {
-                    if (mm.offlineBomber == null) {
-                        mm.CreateBomber(curBomberInfo, false);
-                    }
-                } else {
-                    GameObject curBomber = mm.GetOnlineBomber(curBomberInfo.bomberName);
-                    if (curBomber == null) {
-                        mm.CreateBomber(curBomberInfo, true);
-                    } else {
+                foreach (Bomber.BomberInfo curBomberInfo in bombersArray) {
+                    if (curBomberInfo.bomberName != myBomberName) {
+                        GameObject curBomber = mm.GetOnlineBomber(curBomberInfo.bomberName);
                         curBomber.GetComponent<Bomber>().SetInfo(curBomberInfo);
                     }
                 }
             }
+        }) {
+            IsBackground = true
+        };
+        listenThread.Start();
+        threads.Add(listenThread);
+    }
+
+    // Initializes the game using the first update packet
+    protected void InitGame(string initialUpdateMessage) {
+        gameStarted = true;
+        MapManager mm = GameManager.instance.mapManager;
+        int[,] newBricksLocations;
+        List<int[]> oldBricksLocations = mm.GetTileLocs(typeof(Bricks), true);
+        GameObject[] bombsArray;
+        Bomber.BomberInfo[] bombersArray;
+        Protocol.AnalizeUDPPacket(initialUpdateMessage, out newBricksLocations, out bombsArray, out bombersArray);
+        foreach (Bomber.BomberInfo curBomberInfo in bombersArray) {
+            if (curBomberInfo.bomberName == myBomberName) {
+                mm.CreateBomber(curBomberInfo, false);
+            } else {
+                mm.CreateBomber(curBomberInfo, true);
+            }
         }
+        print("Game started");
     }
 
     // Sends updates to the server

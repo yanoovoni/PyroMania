@@ -4,3 +4,10 @@ C:\Users\yanoo\source\repos\Server\Server\bin\Debug\Server.exe
 C:\Users\yanoo\source\repos\Server\Server\bin\Debug\Server.pdb
 C:\Users\yanoo\source\repos\Server\Server\obj\Debug\Server.exe
 C:\Users\yanoo\source\repos\Server\Server\obj\Debug\Server.pdb
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\bin\Debug\Server.exe.config
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\bin\Debug\Server.exe
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\bin\Debug\Server.pdb
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\obj\Debug\Server.csprojResolveAssemblyReference.cache
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\obj\Debug\Server.exe
+C:\Users\yanoo\Documents\GitHub\PyroMania\Server\Server\Server\obj\Debug\Server.pdb
