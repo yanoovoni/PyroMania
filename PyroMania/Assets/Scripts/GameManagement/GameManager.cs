@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour {
 
     // Loads the game
     public void LoadGame() {
+        controller = Instantiate(controllers[gameControllerIndex]);
         CullingMaskLib camera = GameObject.Find("MainCamera").GetComponent<CullingMaskLib>();
         camera.HideAllLayers();
         camera.LayerCullingShow("UI");
@@ -59,7 +60,6 @@ public class GameManager : MonoBehaviour {
         if (!SceneManager.GetActiveScene().Equals(SceneManager.GetSceneByName("Game"))) {
             SceneManager.LoadScene("Game", LoadSceneMode.Single);
         }
-        controller = Instantiate(controllers[gameControllerIndex]);
     }
 
     // Starts the menu scene

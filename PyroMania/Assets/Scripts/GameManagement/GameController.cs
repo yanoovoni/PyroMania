@@ -9,7 +9,23 @@ public class GameController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        if (Input.GetKey("escape"))
+        if (Input.GetKey("escape")) {
             Application.Quit();
+        }
+        if (Input.GetKey("up")) {
+
+        }
+        if (Input.GetKey("down")) {
+
+        }
+        if (Input.GetKey("right")) {
+
+        }
+        if (Input.GetKey("left")) {
+
+        }
+        if (Input.GetKey("space")) {
+            GameManager.instance.mapManager.GetOfflineBomber().GetComponent<Bomber>().PlaceBomb();
+        }
     }
 }
